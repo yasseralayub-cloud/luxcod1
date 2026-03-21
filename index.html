@@ -70,7 +70,20 @@
         <a href="#contact" class="nav-cta" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</a>
       </div>
       <div class="nav-actions">
-        <div id="authContainer"></div>
+        <!-- AUTH BUTTONS (Always visible) -->
+        <button class="btn btn-sm btn-primary" id="loginBtn" onclick="openAuthModal('login')" title="Login">
+          <i class="fa-solid fa-sign-in-alt"></i>
+          <span data-ar="دخول" data-en="Login">دخول</span>
+        </button>
+        <button class="btn btn-sm btn-outline" id="signupBtn" onclick="openAuthModal('signup')" title="Sign Up">
+          <i class="fa-solid fa-user-plus"></i>
+          <span data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</span>
+        </button>
+        
+        <!-- USER MENU (Hidden by default) -->
+        <div id="authContainer" style="display: none;"></div>
+        
+        <!-- LOGGED IN BUTTONS (Hidden by default) -->
         <button class="btn btn-sm btn-outline" onclick="openRatingModal()" id="rateBtn" style="display: none;" title="Rate Us">
           <i class="fa-solid fa-star"></i>
           <span data-ar="تقييم" data-en="Rate">تقييم</span>

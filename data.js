@@ -137,5 +137,49 @@ const TESTIMONIALS_DATA = [
     comment_en: "Very professional team that understands market needs. The website is not just beautiful design but focuses on conversion and real results.",
     stars: 5,
     avatar: "AD"
+  },
+  {
+    id: 9,
+    name_ar: "فهد الدوسري",
+    name_en: "Fahad Al-Dosari",
+    role_ar: "مالك متجر إلكتروني",
+    role_en: "E-commerce Store Owner",
+    comment_ar: "جودة عالية وأسعار منافسة. الموقع سريع ومتجاوب مع جميع الأجهزة. تجربة ممتازة من البداية للنهاية",
+    comment_en: "High quality and competitive prices. The website is fast and responsive on all devices. Excellent experience from start to finish",
+    stars: 5,
+    avatar: "FD"
+  },
+  {
+    id: 10,
+    name_ar: "نورة القحطاني",
+    name_en: "Noura Al-Qahtani",
+    role_ar: "مديرة تسويق",
+    role_en: "Marketing Manager",
+    comment_ar: "صمموا لي صفحة هبوط زادت مبيعاتي 3 أضعاف! فريق مبدع ومتعاون. سأعود لهم في مشاريعي القادمة بالتأكيد",
+    comment_en: "They designed a landing page that tripled my sales! Creative and cooperative team. I will definitely come back to them for my future projects",
+    stars: 5,
+    avatar: "NQ"
+  },
+  {
+    id: 11,
+    name_ar: "خالد الشمري",
+    name_en: "Khaled Al-Shammari",
+    role_ar: "صاحب شركة",
+    role_en: "Company Owner",
+    comment_ar: "من أفضل الوكالات الرقمية التي تعاملت معها. التصميم عصري والدعم الفني ممتاز حتى بعد إطلاق الموقع",
+    comment_en: "One of the best digital agencies I've worked with. Modern design and excellent technical support even after website launch",
+    stars: 5,
+    avatar: "KS"
+  },
+  {
+    id: 12,
+    name_ar: "سارة العتيبي",
+    name_en: "Sarah Al-Otaibi",
+    role_ar: "مؤسسة مشروع",
+    role_en: "Project Founder",
+    comment_ar: "احترافية عالية وسرعة في التنفيذ. الموقع جاء بالضبط كما تخيلته وأكثر. شكراً لكم على العمل المتميز",
+    comment_en: "High professionalism and fast execution. The website came exactly as I imagined and more. Thank you for the excellent work",
+    stars: 5,
+    avatar: "SE"
   }
 ];
