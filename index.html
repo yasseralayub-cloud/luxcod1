@@ -70,15 +70,15 @@
         <a href="#contact" class="nav-cta" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</a>
       </div>
       <div class="nav-actions">
-        <button class="btn btn-sm btn-outline" onclick="openRatingModal()" title="Rate Us">
+        <div id="authContainer"></div>
+        <button class="btn btn-sm btn-outline" onclick="openRatingModal()" id="rateBtn" style="display: none;" title="Rate Us">
           <i class="fa-solid fa-star"></i>
           <span data-ar="تقييم" data-en="Rate">تقييم</span>
         </button>
-        <button class="btn btn-sm btn-primary" onclick="openPaymentModal()" title="Payment">
+        <button class="btn btn-sm btn-primary" onclick="openPaymentModal()" id="payBtn" style="display: none;" title="Payment">
           <i class="fa-solid fa-credit-card"></i>
           <span data-ar="دفع" data-en="Pay">دفع</span>
         </button>
-        <div id="authContainer"></div>
         <button class="btn btn-sm btn-outline" onclick="openDashboard()" id="dashboardBtn" style="display: none;" title="Dashboard">
           <i class="fa-solid fa-chart-line"></i>
           <span data-ar="لوحتي" data-en="Dashboard">لوحتي</span>
