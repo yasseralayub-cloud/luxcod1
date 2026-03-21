@@ -25,6 +25,7 @@ function initAuthListener() {
 // ============================================================
 function updateAuthUI() {
   const authContainer = document.getElementById('authContainer');
+  const dashboardBtn = document.getElementById('dashboardBtn');
   if (!authContainer) return;
 
   if (currentUser) {
@@ -37,6 +38,7 @@ function updateAuthUI() {
         </button>
       </div>
     `;
+    if (dashboardBtn) dashboardBtn.style.display = 'inline-flex';
   } else {
     authContainer.innerHTML = `
       <button class="btn btn-sm btn-primary" onclick="openAuthModal('login')">
@@ -48,6 +50,7 @@ function updateAuthUI() {
         <span>${currentLang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}</span>
       </button>
     `;
+    if (dashboardBtn) dashboardBtn.style.display = 'none';
   }
 }
 

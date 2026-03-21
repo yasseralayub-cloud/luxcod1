@@ -79,6 +79,10 @@
           <span data-ar="دفع" data-en="Pay">دفع</span>
         </button>
         <div id="authContainer"></div>
+        <button class="btn btn-sm btn-outline" onclick="openDashboard()" id="dashboardBtn" style="display: none;" title="Dashboard">
+          <i class="fa-solid fa-chart-line"></i>
+          <span data-ar="لوحتي" data-en="Dashboard">لوحتي</span>
+        </button>
         <button class="lang-toggle" id="langToggle" title="Switch Language">EN</button>
         <button class="hamburger" id="hamburger" aria-label="Menu">
           <span></span><span></span><span></span>
@@ -203,6 +207,10 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="متوافق مع جميع الأجهزة" data-en="All Devices Compatible">متوافق مع جميع الأجهزة</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="سرعة تحميل فائقة" data-en="Lightning Fast Loading">سرعة تحميل فائقة</span></li>
           </ul>
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('website-design')" style="margin-top: 20px;">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
+          </button>
         </div>
         <div class="service-card featured">
           <div class="featured-badge" data-ar="الأكثر طلباً" data-en="Most Popular">الأكثر طلباً</div>
@@ -217,6 +225,10 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="نصوص مقنعة وجذابة" data-en="Persuasive Copywriting">نصوص مقنعة وجذابة</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="اختبار A/B" data-en="A/B Testing">اختبار A/B</span></li>
           </ul>
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('landing-page')" style="margin-top: 20px;">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
+          </button>
         </div>
         <div class="service-card">
           <div class="service-icon-wrap">
@@ -230,6 +242,10 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="تحسين رحلة العميل" data-en="Customer Journey Optimization">تحسين رحلة العميل</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="تصميم واجهات بديهية" data-en="Intuitive Interface Design">تصميم واجهات بديهية</span></li>
           </ul>
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('ui-ux-optimization')" style="margin-top: 20px;">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
+          </button>
         </div>
         <div class="service-card">
           <div class="service-icon-wrap">
@@ -243,6 +259,10 @@
             <li><i class="fa-brands fa-google"></i><span data-ar="خرائط جوجل" data-en="Google Maps">خرائط جوجل</span></li>
             <li><i class="fa-solid fa-share-nodes"></i><span data-ar="ربط وسائل التواصل" data-en="Social Media Links">ربط وسائل التواصل</span></li>
           </ul>
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('integrations')" style="margin-top: 20px;">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
+          </button>
         </div>
       </div>
     </div>
@@ -483,6 +503,8 @@
   <script src="ratings.js"></script>
   <script src="contact-email.js"></script>
   <script src="payments.js"></script>
+  <script src="services-ordering.js"></script>
+  <script src="dashboard.js"></script>
   
   <!-- Main App -->
   <script src="app.js"></script>
