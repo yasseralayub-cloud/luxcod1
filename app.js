@@ -515,6 +515,20 @@ function initContactForm() {
     const formSuccess = document.getElementById('formSuccess');
     const formError = document.getElementById('formError');
 
+    // Get form data
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    // Validate
+    if (!name || !phone || !message) {
+      formError.style.display = 'flex';
+      formError.querySelector('span').textContent = currentLang === 'ar' 
+        ? 'يرجى ملء جميع الحقول' 
+        : 'Please fill all fields';
+      return;
+    }
+
     // Hide previous messages
     formSuccess.style.display = 'none';
     formError.style.display = 'none';
@@ -526,23 +540,24 @@ function initContactForm() {
     if (btnIcon) btnIcon.style.display = 'none';
 
     try {
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Accept': 'application/json' }
-      });
+      // Send via EmailJS
+      const result = await sendContactMessage(name, phone, message);
 
-      if (response.ok) {
+      if (result.success) {
         formSuccess.style.display = 'flex';
+        formSuccess.querySelector('span').textContent = result.message;
         form.reset();
         // Scroll to success message
         formSuccess.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       } else {
-        throw new Error('Server error');
+        throw new Error(result.message);
       }
     } catch (err) {
+      console.error('Form error:', err);
       formError.style.display = 'flex';
+      formError.querySelector('span').textContent = currentLang === 'ar' 
+        ? 'حدث خطأ. يرجى المحاولة مرة أخرى أو التواصل عبر واتساب.' 
+        : 'An error occurred. Please try again or contact us via WhatsApp.';
     } finally {
       submitBtn.disabled = false;
       btnText.style.display = 'inline';
