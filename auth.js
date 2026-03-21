@@ -5,22 +5,30 @@
 'use strict';
 
 let currentUser = null;
+let currentLang = localStorage.getItem('luxcod-lang') || 'ar';
 
 // ============================================================
 // AUTH STATE LISTENER
 // ============================================================
 function initAuthListener() {
-  firebase.auth().onAuthStateChanged((user) => {
-    currentUser = user;
-    updateAuthUI();
-    updateAuthButtons();
-    
-    if (user) {
-      console.log('✅ User logged in:', user.email);
-    } else {
-      console.log('❌ User logged out');
+  // Wait for Firebase to be initialized
+  const checkFirebase = setInterval(() => {
+    if (window.firebaseAuth) {
+      clearInterval(checkFirebase);
+      
+      window.firebaseAuth.onAuthStateChanged((user) => {
+        currentUser = user;
+        updateAuthUI();
+        updateAuthButtons();
+        
+        if (user) {
+          console.log('✅ User logged in:', user.email);
+        } else {
+          console.log('❌ User logged out');
+        }
+      });
     }
-  });
+  }, 100);
 }
 
 // ============================================================
@@ -101,47 +109,36 @@ function createAuthModal() {
   });
 }
 
+// ============================================================
+// OPEN AUTH MODAL
+// ============================================================
 function openAuthModal(tab = 'login') {
   let modal = document.getElementById('authModal');
+  
   if (!modal) {
     createAuthModal();
     modal = document.getElementById('authModal');
   }
 
-  const content = document.getElementById('authContent');
+  const authContent = document.getElementById('authContent');
   
   if (tab === 'login') {
-    content.innerHTML = getLoginForm();
+    authContent.innerHTML = getLoginForm();
   } else if (tab === 'signup') {
-    content.innerHTML = getSignupForm();
+    authContent.innerHTML = getSignupForm();
   } else if (tab === 'forgot') {
-    content.innerHTML = getForgotPasswordForm();
+    authContent.innerHTML = getForgotPasswordForm();
   }
 
-  modal.classList.add('active');
+  modal.style.display = 'flex';
 }
 
+// ============================================================
+// CLOSE AUTH MODAL
+// ============================================================
 function closeAuthModal() {
   const modal = document.getElementById('authModal');
-  if (modal) modal.classList.remove('active');
-}
-
-// ============================================================
-// PASSWORD VISIBILITY TOGGLE
-// ============================================================
-function togglePasswordVisibility(inputId, toggleId) {
-  const input = document.getElementById(inputId);
-  const toggle = document.getElementById(toggleId);
-  
-  if (!input || !toggle) return;
-  
-  if (input.type === 'password') {
-    input.type = 'text';
-    toggle.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
-  } else {
-    input.type = 'password';
-    toggle.innerHTML = '<i class="fa-solid fa-eye"></i>';
-  }
+  if (modal) modal.style.display = 'none';
 }
 
 // ============================================================
@@ -151,7 +148,7 @@ function getLoginForm() {
   return `
     <div class="auth-header">
       <h2>${currentLang === 'ar' ? 'تسجيل الدخول' : 'Login'}</h2>
-      <p>${currentLang === 'ar' ? 'أدخل بيانات حسابك' : 'Enter your credentials'}</p>
+      <p>${currentLang === 'ar' ? 'أهلاً بعودتك' : 'Welcome back'}</p>
     </div>
 
     <form id="loginForm" onsubmit="handleLogin(event)">
@@ -184,11 +181,11 @@ function getLoginForm() {
     </div>
 
     <div class="auth-links">
-      <button type="button" class="link-btn" onclick="openAuthModal('signup')">
-        ${currentLang === 'ar' ? 'إنشاء حساب جديد' : 'Create new account'}
-      </button>
       <button type="button" class="link-btn" onclick="openAuthModal('forgot')">
         ${currentLang === 'ar' ? 'هل نسيت كلمة المرور؟' : 'Forgot password?'}
+      </button>
+      <button type="button" class="link-btn" onclick="openAuthModal('signup')">
+        ${currentLang === 'ar' ? 'ليس لديك حساب؟ إنشاء' : 'No account? Create one'}
       </button>
     </div>
   `;
@@ -311,15 +308,13 @@ async function handleLogin(e) {
   submitBtn.disabled = true;
 
   try {
-    const result = await firebase.auth().signInWithEmailAndPassword(email, password);
-    
-    if (!result.user.emailVerified) {
-      errorDiv.textContent = currentLang === 'ar'
-        ? '⚠️ يرجى تأكيد بريدك الإلكتروني أولاً'
-        : '⚠️ Please verify your email first';
+    if (!window.firebaseAuth) {
+      errorDiv.textContent = currentLang === 'ar' ? '❌ خطأ في الاتصال' : '❌ Connection error';
       submitBtn.disabled = false;
       return;
     }
+
+    await window.firebaseAuth.signInWithEmailAndPassword(email, password);
 
     successDiv.textContent = currentLang === 'ar'
       ? '✅ تم تسجيل الدخول بنجاح!'
@@ -373,7 +368,15 @@ async function handleSignup(e) {
   }
 
   try {
-    const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    if (!window.firebaseAuth || !window.firebaseDB) {
+      errorDiv.textContent = currentLang === 'ar'
+        ? '❌ خطأ في الاتصال. حاول مرة أخرى'
+        : '❌ Connection error. Try again';
+      submitBtn.disabled = false;
+      return;
+    }
+
+    const result = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
     const user = result.user;
 
     await user.updateProfile({ displayName: name });
@@ -381,7 +384,7 @@ async function handleSignup(e) {
       url: window.location.origin + window.location.pathname
     });
 
-    await firebase.firestore().collection('users').doc(user.uid).set({
+    await window.firebaseDB.collection('users').doc(user.uid).set({
       name: name,
       email: email,
       createdAt: new Date(),
@@ -435,25 +438,22 @@ async function handleForgotPassword(e) {
   submitBtn.disabled = true;
 
   try {
-    await firebase.auth().sendPasswordResetEmail(email, {
-      url: window.location.origin + window.location.pathname
-    });
+    if (!window.firebaseAuth) {
+      errorDiv.textContent = currentLang === 'ar' ? '❌ خطأ في الاتصال' : '❌ Connection error';
+      submitBtn.disabled = false;
+      return;
+    }
 
-    successDiv.innerHTML = `
-      <div style="text-align: center;">
-        <p style="margin-bottom: 10px;">✅ ${currentLang === 'ar' ? 'تم إرسال الرابط بنجاح!' : 'Reset link sent successfully!'}</p>
-        <p style="font-size: 14px; color: var(--gold);">
-          ${currentLang === 'ar' 
-            ? '📧 تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور' 
-            : '📧 Check your email to reset password'}
-        </p>
-      </div>
-    `;
+    await window.firebaseAuth.sendPasswordResetEmail(email);
+
+    successDiv.textContent = currentLang === 'ar'
+      ? '✅ تم إرسال رابط إعادة التعيين إلى بريدك'
+      : '✅ Reset link sent to your email';
 
     setTimeout(() => {
       closeAuthModal();
       submitBtn.disabled = false;
-    }, 3000);
+    }, 2000);
 
   } catch (error) {
     submitBtn.disabled = false;
@@ -468,13 +468,32 @@ async function handleForgotPassword(e) {
 }
 
 // ============================================================
+// TOGGLE PASSWORD VISIBILITY
+// ============================================================
+function togglePasswordVisibility(inputId, toggleId) {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  
+  if (!input || !toggle) return;
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+  } else {
+    input.type = 'password';
+    toggle.innerHTML = '<i class="fa-solid fa-eye"></i>';
+  }
+}
+
+// ============================================================
 // LOGOUT
 // ============================================================
 async function logout() {
   try {
-    await firebase.auth().signOut();
-    console.log('✅ Logged out successfully');
-    closeAuthModal();
+    if (window.firebaseAuth) {
+      await window.firebaseAuth.signOut();
+      console.log('✅ Logged out successfully');
+    }
   } catch (error) {
     console.error('Logout error:', error);
   }
@@ -483,18 +502,10 @@ async function logout() {
 // ============================================================
 // INITIALIZE
 // ============================================================
-function initAuthSystem() {
-  if (!document.getElementById('authModal')) {
-    createAuthModal();
-  }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initAuthListener();
+  });
+} else {
   initAuthListener();
 }
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAuthSystem);
-} else {
-  initAuthSystem();
-}
-
-console.log('✅ Enhanced Authentication System loaded');

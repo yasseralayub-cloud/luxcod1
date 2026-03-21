@@ -205,3 +205,110 @@ document.addEventListener('DOMContentLoaded', () => {
     createRatingModal();
   }
 });
+
+
+// ============================================================
+// RATING BOX FUNCTIONS
+// ============================================================
+let selectedRating = 0;
+
+function initRatingBox() {
+  const stars = document.querySelectorAll('.rating-stars i');
+  
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      selectedRating = parseInt(this.getAttribute('data-rating'));
+      
+      // Update visual state
+      stars.forEach(s => {
+        const rating = parseInt(s.getAttribute('data-rating'));
+        if (rating <= selectedRating) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+    });
+    
+    // Hover effect
+    star.addEventListener('mouseover', function() {
+      const hoverRating = parseInt(this.getAttribute('data-rating'));
+      stars.forEach(s => {
+        const rating = parseInt(s.getAttribute('data-rating'));
+        if (rating <= hoverRating) {
+          s.style.color = 'var(--gold)';
+        } else {
+          s.style.color = 'var(--text-muted)';
+        }
+      });
+    });
+  });
+  
+  document.querySelectorAll('.rating-stars').forEach(container => {
+    container.addEventListener('mouseleave', function() {
+      stars.forEach(s => {
+        const rating = parseInt(s.getAttribute('data-rating'));
+        if (rating <= selectedRating) {
+          s.style.color = 'var(--gold)';
+        } else {
+          s.style.color = 'var(--text-muted)';
+        }
+      });
+    });
+  });
+}
+
+async function submitRating(event) {
+  if (event) event.preventDefault();
+  
+  const comment = document.getElementById('ratingComment').value;
+  
+  if (!selectedRating) {
+    alert(currentLang === 'ar' ? 'الرجاء اختيار تقييم' : 'Please select a rating');
+    return;
+  }
+  
+  if (!comment.trim()) {
+    alert(currentLang === 'ar' ? 'الرجاء إضافة تعليق' : 'Please add a comment');
+    return;
+  }
+  
+  try {
+    // Check if user is logged in
+    if (!currentUser) {
+      alert(currentLang === 'ar' ? 'الرجاء تسجيل الدخول أولاً' : 'Please login first');
+      openAuthModal('login');
+      return;
+    }
+    
+    // Save rating to Firestore
+    if (window.firebaseDB) {
+      await window.firebaseDB.collection('ratings').add({
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        rating: selectedRating,
+        comment: comment,
+        timestamp: new Date(),
+        approved: false
+      });
+      
+      // Reset form
+      selectedRating = 0;
+      document.getElementById('ratingComment').value = '';
+      document.querySelectorAll('.rating-stars i').forEach(s => s.classList.remove('active'));
+      
+      // Show success message
+      alert(currentLang === 'ar' ? 'شكراً لتقييمك! سيتم مراجعته قريباً' : 'Thank you for your rating! It will be reviewed soon');
+    }
+  } catch (error) {
+    console.error('Rating submission error:', error);
+    alert(currentLang === 'ar' ? 'حدث خطأ في إرسال التقييم' : 'Error submitting rating');
+  }
+}
+
+// Initialize rating box when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initRatingBox);
+} else {
+  initRatingBox();
+}

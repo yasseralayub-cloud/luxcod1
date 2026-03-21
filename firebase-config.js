@@ -9,15 +9,40 @@ const firebaseConfig = {
   measurementId: "G-PW8TY4VSV8"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase with error handling
+function initializeFirebase() {
+  try {
+    if (typeof firebase === 'undefined') {
+      console.error('❌ Firebase SDK not loaded');
+      return false;
+    }
+    
+    // Check if already initialized
+    if (firebase.apps.length === 0) {
+      firebase.initializeApp(firebaseConfig);
+      console.log('✅ Firebase initialized successfully');
+    } else {
+      console.log('✅ Firebase already initialized');
+    }
+    
+    // Get Firebase services
+    window.firebaseAuth = firebase.auth();
+    window.firebaseDB = firebase.firestore();
+    window.firebaseStorage = firebase.storage();
+    
+    // Global firebase reference
+    window.firebase = firebase;
+    
+    return true;
+  } catch (error) {
+    console.error('❌ Firebase initialization error:', error);
+    return false;
+  }
+}
 
-// Get Firebase services
-const auth = firebase.auth();
-const db = firebase.firestore();
-const storage = firebase.storage();
-
-// Export for use in other scripts
-window.firebaseAuth = auth;
-window.firebaseDB = db;
-window.firebaseStorage = storage;
+// Initialize on script load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeFirebase);
+} else {
+  initializeFirebase();
+}

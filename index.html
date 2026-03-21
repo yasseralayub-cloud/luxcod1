@@ -370,6 +370,23 @@
         <div class="slider-dots" id="sliderDots"></div>
         <button class="slider-btn" id="nextBtn" aria-label="Next"><i class="fa-solid fa-chevron-left"></i></button>
       </div>
+      
+      <!-- RATING BOX -->
+      <div class="rating-box">
+        <div class="rating-box-content">
+          <h3 data-ar="شارك رأيك معنا" data-en="Share Your Feedback">شارك رأيك معنا</h3>
+          <p data-ar="ساعدنا في التحسن من خلال تقييمك الصريح" data-en="Help us improve with your honest feedback">ساعدنا في التحسن من خلال تقييمك الصريح</p>
+          <div class="rating-stars" id="ratingStars">
+            <i class="fa-solid fa-star" data-rating="1"></i>
+            <i class="fa-solid fa-star" data-rating="2"></i>
+            <i class="fa-solid fa-star" data-rating="3"></i>
+            <i class="fa-solid fa-star" data-rating="4"></i>
+            <i class="fa-solid fa-star" data-rating="5"></i>
+          </div>
+          <textarea id="ratingComment" placeholder="أضف تعليقك هنا..." data-ar-placeholder="أضف تعليقك هنا..." data-en-placeholder="Add your comment here..."></textarea>
+          <button class="btn btn-primary" onclick="submitRating()" data-ar="إرسال التقييم" data-en="Submit Rating">إرسال التقييم</button>
+        </div>
+      </div>
     </div>
   </section>
 
