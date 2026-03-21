@@ -28,29 +28,34 @@ function initAuthListener() {
 // ============================================================
 function updateAuthUI() {
   const authContainer = document.getElementById('authContainer');
-  if (!authContainer) return;
-
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  
   if (currentUser) {
-    authContainer.innerHTML = `
-      <div class="user-menu">
-        <span class="user-email">${currentUser.email}</span>
-        <button class="btn btn-sm btn-outline" onclick="logout()" style="display: inline-flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-sign-out-alt"></i>
-          <span>${currentLang === 'ar' ? 'خروج' : 'Logout'}</span>
-        </button>
-      </div>
-    `;
+    // Hide direct buttons
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (signupBtn) signupBtn.style.display = 'none';
+    
+    // Show user menu
+    if (authContainer) {
+      authContainer.style.display = 'flex';
+      authContainer.innerHTML = `
+        <div class="user-menu">
+          <span class="user-email">${currentUser.email}</span>
+          <button class="btn btn-sm btn-outline" onclick="logout()" style="display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-sign-out-alt"></i>
+            <span>${currentLang === 'ar' ? 'خروج' : 'Logout'}</span>
+          </button>
+        </div>
+      `;
+    }
   } else {
-    authContainer.innerHTML = `
-      <button class="btn btn-sm btn-primary" onclick="openAuthModal('login')" style="display: inline-flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-sign-in-alt"></i>
-        <span>${currentLang === 'ar' ? 'دخول' : 'Login'}</span>
-      </button>
-      <button class="btn btn-sm btn-outline" onclick="openAuthModal('signup')" style="display: inline-flex; align-items: center; gap: 8px;">
-        <i class="fa-solid fa-user-plus"></i>
-        <span>${currentLang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}</span>
-      </button>
-    `;
+    // Show direct buttons
+    if (loginBtn) loginBtn.style.display = 'inline-flex';
+    if (signupBtn) signupBtn.style.display = 'inline-flex';
+    
+    // Hide user menu
+    if (authContainer) authContainer.style.display = 'none';
   }
 }
 
