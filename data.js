@@ -22,7 +22,7 @@ const PORTFOLIO_DATA = [
     desc_en: "Elegant spa website reflecting tranquility and luxury with integrated booking system",
     category_ar: "صفحة هبوط",
     category_en: "Landing Page",
-    url: null,
+    url: "https://yashimspa.github.io/YASHIM-SPA/",
     color: "#8b5cf6"
   },
   {
@@ -33,8 +33,19 @@ const PORTFOLIO_DATA = [
     desc_en: "Events and occasions website with bold design and stunning interactive presentations",
     category_ar: "تصميم موقع",
     category_en: "Website Design",
-    url: null,
+    url: "https://redcarpetsa.github.io/REDCARPETsa/",
     color: "#ef4444"
+  },
+  {
+    id: 4,
+    name_ar: "Shaher",
+    name_en: "Shaher",
+    desc_ar: "منصة متقدمة بتصميم عصري وتجربة مستخدم استثنائية",
+    desc_en: "Advanced platform with modern design and exceptional user experience",
+    category_ar: "تصميم موقع",
+    category_en: "Website Design",
+    url: "https://yasseralayub-cloud.github.io/shaher/",
+    color: "#06b6d4"
   }
 ];
 
@@ -82,5 +93,49 @@ const TESTIMONIALS_DATA = [
     comment_en: "The post-delivery support that LuxCod provides is invaluable. Whenever I needed a modification or help, they were immediately available. This is what sets them apart from others.",
     stars: 5,
     avatar: "AQ"
+  },
+  {
+    id: 5,
+    name_ar: "فاطمة الزهراني",
+    name_en: "Fatima Al-Zahrani",
+    role_ar: "مديرة تسويق رقمي",
+    role_en: "Digital Marketing Manager",
+    comment_ar: "تجربة رائعة من البداية إلى النهاية. الفريق استمع لكل ملاحظاتي وحولها إلى واقع. الموقع يعكس رؤيتنا بشكل مثالي وتحويل الزوار ممتاز!",
+    comment_en: "Amazing experience from start to finish. The team listened to all my feedback and turned it into reality. The website perfectly reflects our vision and visitor conversion is excellent!",
+    stars: 5,
+    avatar: "FZ"
+  },
+  {
+    id: 6,
+    name_ar: "خالد العمري",
+    name_en: "Khaled Al-Omari",
+    role_ar: "صاحب شركة تكنولوجيا",
+    role_en: "Tech Company Owner",
+    comment_ar: "أفضل استثمار قمت به لشركتي. الموقع احترافي جداً والأداء سريع جداً. LuxCod فريق يستحق كل ثقة.",
+    comment_en: "The best investment I made for my company. The website is very professional and performance is very fast. LuxCod is a team that deserves all trust.",
+    stars: 5,
+    avatar: "KO"
+  },
+  {
+    id: 7,
+    name_ar: "ليلى محمد",
+    name_en: "Layla Mohammed",
+    role_ar: "مؤسسة متجر إلكتروني",
+    role_en: "E-commerce Store Founder",
+    comment_ar: "موقع جميل جداً وسهل الاستخدام. العملاء يحبونه والمبيعات ارتفعت بشكل ملحوظ. شكراً LuxCod!",
+    comment_en: "Beautiful and easy-to-use website. Customers love it and sales increased significantly. Thank you LuxCod!",
+    stars: 5,
+    avatar: "LM"
+  },
+  {
+    id: 8,
+    name_ar: "أحمد الدعيع",
+    name_en: "Ahmed Al-Duaij",
+    role_ar: "مستشار أعمال",
+    role_en: "Business Consultant",
+    comment_ar: "فريق احترافي جداً يفهم احتياجات السوق. الموقع لا يقتصر على التصميم الجميل بل يركز على التحويل والنتائج الحقيقية.",
+    comment_en: "Very professional team that understands market needs. The website is not just beautiful design but focuses on conversion and real results.",
+    stars: 5,
+    avatar: "AD"
   }
 ];
