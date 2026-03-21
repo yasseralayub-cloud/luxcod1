@@ -66,15 +66,11 @@ function createPaymentModal() {
       <div id="bankDetails" class="bank-details" style="display: none;">
         <h3 data-ar="تفاصيل التحويل البنكي" data-en="Bank Transfer Details">تفاصيل التحويل البنكي</h3>
         <div class="bank-info">
-          <p><strong data-ar="اسم البنك" data-en="Bank Name">اسم البنك:</strong> البنك الأهلي السعودي</p>
-          <p><strong data-ar="رقم الحساب" data-en="Account Number">رقم الحساب:</strong> 1234567890</p>
-          <p><strong data-ar="رقم IBAN" data-en="IBAN">رقم IBAN:</strong> SA0320000001234567890</p>
-          <p><strong data-ar="باسم" data-en="Account Name">باسم:</strong> LuxCod Digital Agency</p>
+          <p style="color: var(--gold); font-size: 16px; text-align: center; padding: 30px 0;">
+            <i class="fa-solid fa-info-circle" style="margin-right: 10px;"></i>
+            <span data-ar="سيتم إرسال تفاصيل الحساب بعد طلب الخدمة" data-en="Account details will be sent after service request">سيتم إرسال تفاصيل الحساب بعد طلب الخدمة</span>
+          </p>
         </div>
-        <button class="btn btn-outline btn-full" onclick="copyBankDetails()">
-          <i class="fa-solid fa-copy"></i>
-          <span data-ar="نسخ التفاصيل" data-en="Copy Details">نسخ التفاصيل</span>
-        </button>
       </div>
 
       <!-- PAYPAL CONTAINER -->

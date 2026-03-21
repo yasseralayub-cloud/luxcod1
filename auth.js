@@ -1,5 +1,5 @@
 /* ============================================================
-   LuxCod - Firebase Authentication System (Enhanced)
+   LuxCod - Firebase Authentication System (Fixed & Enhanced)
    ============================================================ */
 
 'use strict';
@@ -17,9 +17,6 @@ function initAuthListener() {
     
     if (user) {
       console.log('✅ User logged in:', user.email);
-      console.log('✉️ Email verified:', user.emailVerified);
-      loadUserRatings();
-      loadUserOrders();
     } else {
       console.log('❌ User logged out');
     }
@@ -37,19 +34,19 @@ function updateAuthUI() {
     authContainer.innerHTML = `
       <div class="user-menu">
         <span class="user-email">${currentUser.email}</span>
-        <button class="btn btn-sm btn-outline" onclick="logout()">
+        <button class="btn btn-sm btn-outline" onclick="logout()" style="display: inline-flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-sign-out-alt"></i>
-          <span>${currentLang === 'ar' ? 'تسجيل خروج' : 'Logout'}</span>
+          <span>${currentLang === 'ar' ? 'خروج' : 'Logout'}</span>
         </button>
       </div>
     `;
   } else {
     authContainer.innerHTML = `
-      <button class="btn btn-sm btn-primary" onclick="openAuthModal('login')">
+      <button class="btn btn-sm btn-primary" onclick="openAuthModal('login')" style="display: inline-flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-sign-in-alt"></i>
         <span>${currentLang === 'ar' ? 'دخول' : 'Login'}</span>
       </button>
-      <button class="btn btn-sm btn-outline" onclick="openAuthModal('signup')">
+      <button class="btn btn-sm btn-outline" onclick="openAuthModal('signup')" style="display: inline-flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-user-plus"></i>
         <span>${currentLang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}</span>
       </button>
@@ -88,7 +85,6 @@ function createAuthModal() {
       <button class="modal-close" onclick="closeAuthModal()">
         <i class="fa-solid fa-times"></i>
       </button>
-      
       <div id="authContent"></div>
     </div>
   `;
@@ -126,6 +122,24 @@ function closeAuthModal() {
 }
 
 // ============================================================
+// PASSWORD VISIBILITY TOGGLE
+// ============================================================
+function togglePasswordVisibility(inputId, toggleId) {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  
+  if (!input || !toggle) return;
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+  } else {
+    input.type = 'password';
+    toggle.innerHTML = '<i class="fa-solid fa-eye"></i>';
+  }
+}
+
+// ============================================================
 // LOGIN FORM
 // ============================================================
 function getLoginForm() {
@@ -143,7 +157,12 @@ function getLoginForm() {
 
       <div class="form-group">
         <label>${currentLang === 'ar' ? 'كلمة المرور' : 'Password'}</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required>
+        <div class="password-input-group">
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+          <button type="button" id="loginPasswordToggle" class="password-toggle" onclick="togglePasswordVisibility('loginPassword', 'loginPasswordToggle')">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-full">
@@ -193,13 +212,23 @@ function getSignupForm() {
 
       <div class="form-group">
         <label>${currentLang === 'ar' ? 'كلمة المرور' : 'Password'}</label>
-        <input type="password" id="signupPassword" placeholder="••••••••" required minlength="6">
+        <div class="password-input-group">
+          <input type="password" id="signupPassword" placeholder="••••••••" required minlength="6">
+          <button type="button" id="signupPasswordToggle" class="password-toggle" onclick="togglePasswordVisibility('signupPassword', 'signupPasswordToggle')">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
         <small>${currentLang === 'ar' ? 'يجب أن تكون 6 أحرف على الأقل' : 'At least 6 characters'}</small>
       </div>
 
       <div class="form-group">
         <label>${currentLang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password'}</label>
-        <input type="password" id="signupPasswordConfirm" placeholder="••••••••" required minlength="6">
+        <div class="password-input-group">
+          <input type="password" id="signupPasswordConfirm" placeholder="••••••••" required minlength="6">
+          <button type="button" id="signupPasswordConfirmToggle" class="password-toggle" onclick="togglePasswordVisibility('signupPasswordConfirm', 'signupPasswordConfirmToggle')">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-full">
@@ -270,17 +299,20 @@ async function handleLogin(e) {
   const password = document.getElementById('loginPassword').value;
   const errorDiv = document.getElementById('loginError');
   const successDiv = document.getElementById('loginSuccess');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
   errorDiv.textContent = '';
   successDiv.textContent = '';
+  submitBtn.disabled = true;
 
   try {
     const result = await firebase.auth().signInWithEmailAndPassword(email, password);
     
     if (!result.user.emailVerified) {
       errorDiv.textContent = currentLang === 'ar'
-        ? '⚠️ يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق البريد الوارد.'
-        : '⚠️ Please verify your email first. Check your inbox.';
+        ? '⚠️ يرجى تأكيد بريدك الإلكتروني أولاً'
+        : '⚠️ Please verify your email first';
+      submitBtn.disabled = false;
       return;
     }
 
@@ -290,18 +322,17 @@ async function handleLogin(e) {
 
     setTimeout(() => {
       closeAuthModal();
+      submitBtn.disabled = false;
     }, 1500);
 
   } catch (error) {
-    console.error('Login error:', error);
-    
+    submitBtn.disabled = false;
     let message = error.message;
+    
     if (error.code === 'auth/user-not-found') {
       message = currentLang === 'ar' ? '❌ البريد الإلكتروني غير موجود' : '❌ Email not found';
     } else if (error.code === 'auth/wrong-password') {
       message = currentLang === 'ar' ? '❌ كلمة المرور غير صحيحة' : '❌ Wrong password';
-    } else if (error.code === 'auth/invalid-email') {
-      message = currentLang === 'ar' ? '❌ البريد الإلكتروني غير صحيح' : '❌ Invalid email';
     } else if (error.code === 'auth/too-many-requests') {
       message = currentLang === 'ar' ? '❌ محاولات كثيرة. حاول لاحقاً' : '❌ Too many attempts. Try later';
     }
@@ -322,48 +353,34 @@ async function handleSignup(e) {
   const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
   const errorDiv = document.getElementById('signupError');
   const successDiv = document.getElementById('signupSuccess');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
   errorDiv.textContent = '';
   successDiv.textContent = '';
+  submitBtn.disabled = true;
 
-  // Validation
   if (password !== passwordConfirm) {
     errorDiv.textContent = currentLang === 'ar'
       ? '❌ كلمات المرور غير متطابقة'
       : '❌ Passwords do not match';
-    return;
-  }
-
-  if (password.length < 6) {
-    errorDiv.textContent = currentLang === 'ar'
-      ? '❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل'
-      : '❌ Password must be at least 6 characters';
+    submitBtn.disabled = false;
     return;
   }
 
   try {
-    // Create user
     const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
     const user = result.user;
 
-    // Update profile
-    await user.updateProfile({
-      displayName: name
-    });
-
-    // Send verification email
+    await user.updateProfile({ displayName: name });
     await user.sendEmailVerification({
       url: window.location.origin + window.location.pathname
     });
 
-    // Save user data to Firestore
     await firebase.firestore().collection('users').doc(user.uid).set({
       name: name,
       email: email,
       createdAt: new Date(),
-      emailVerified: false,
-      orders: [],
-      ratings: []
+      emailVerified: false
     });
 
     successDiv.innerHTML = `
@@ -380,18 +397,17 @@ async function handleSignup(e) {
     setTimeout(() => {
       closeAuthModal();
       openAuthModal('login');
+      submitBtn.disabled = false;
     }, 3000);
 
   } catch (error) {
-    console.error('Signup error:', error);
-    
+    submitBtn.disabled = false;
     let message = error.message;
+    
     if (error.code === 'auth/email-already-in-use') {
       message = currentLang === 'ar' ? '❌ البريد الإلكتروني مستخدم بالفعل' : '❌ Email already in use';
     } else if (error.code === 'auth/weak-password') {
       message = currentLang === 'ar' ? '❌ كلمة المرور ضعيفة جداً' : '❌ Password is too weak';
-    } else if (error.code === 'auth/invalid-email') {
-      message = currentLang === 'ar' ? '❌ البريد الإلكتروني غير صحيح' : '❌ Invalid email';
     }
     
     errorDiv.textContent = message;
@@ -407,9 +423,11 @@ async function handleForgotPassword(e) {
   const email = document.getElementById('forgotEmail').value.trim();
   const errorDiv = document.getElementById('forgotError');
   const successDiv = document.getElementById('forgotSuccess');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
   errorDiv.textContent = '';
   successDiv.textContent = '';
+  submitBtn.disabled = true;
 
   try {
     await firebase.auth().sendPasswordResetEmail(email, {
@@ -429,16 +447,15 @@ async function handleForgotPassword(e) {
 
     setTimeout(() => {
       closeAuthModal();
+      submitBtn.disabled = false;
     }, 3000);
 
   } catch (error) {
-    console.error('Forgot password error:', error);
-    
+    submitBtn.disabled = false;
     let message = error.message;
+    
     if (error.code === 'auth/user-not-found') {
       message = currentLang === 'ar' ? '❌ البريد الإلكتروني غير موجود' : '❌ Email not found';
-    } else if (error.code === 'auth/invalid-email') {
-      message = currentLang === 'ar' ? '❌ البريد الإلكتروني غير صحيح' : '❌ Invalid email';
     }
     
     errorDiv.textContent = message;
@@ -458,12 +475,21 @@ async function logout() {
   }
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
+// ============================================================
+// INITIALIZE
+// ============================================================
+function initAuthSystem() {
   if (!document.getElementById('authModal')) {
     createAuthModal();
   }
   initAuthListener();
-});
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAuthSystem);
+} else {
+  initAuthSystem();
+}
 
 console.log('✅ Enhanced Authentication System loaded');
