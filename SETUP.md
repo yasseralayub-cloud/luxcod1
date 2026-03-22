@@ -11,6 +11,40 @@
 
 ---
 
+## ⚠️ حل مشكلة "خطأ في الاتصال" (Connection Error)
+
+إذا رأيت رسالة "❌ خطأ في الاتصال. حاول مرة أخرى" عند التسجيل، اتبع هذه الخطوات:
+
+### الخطوة 1: تفعيل Authentication
+1. اذهب إلى [Firebase Console](https://console.firebase.google.com)
+2. اختر مشروع `luxcode-167ee`
+3. من القائمة الجانبية: **Authentication**
+4. اضغط على **Sign-in method** (طريقة تسجيل الدخول)
+5. ابحث عن **Email/Password** وتأكد من أنها **مفعّلة** (أخضر)
+6. إذا لم تكن مفعّلة، اضغط عليها واختر **Enable**
+
+### الخطوة 2: إضافة النطاق (Domain)
+1. في نفس صفحة **Authentication**
+2. اذهب إلى تبويب **Settings** (الإعدادات)
+3. ابحث عن **Authorized domains** (النطاقات المصرح بها)
+4. اضغط على **Add domain**
+5. أضف: `yasseralayub-cloud.github.io`
+6. اضغط **Add**
+
+### الخطوة 3: تفعيل Firestore Database
+1. من القائمة الجانبية: **Firestore Database**
+2. اضغط على **Create database**
+3. اختر **Start in test mode** (وضع الاختبار)
+4. اختر المنطقة الأقرب (مثل: `us-central1`)
+5. اضغط **Create**
+
+### الخطوة 4: إضافة Firestore Rules
+1. في Firestore، اذهب إلى تبويب **Rules**
+2. استبدل جميع النصوص بالقواعس أدناه
+3. اضغط **Publish**
+
+---
+
 ## 📧 Authentication Setup (مهم جداً)
 
 ### 1. Enable Email/Password Authentication
@@ -216,6 +250,14 @@ service cloud.firestore {
 
 ## 🐛 Troubleshooting
 
+### خطأ "خطأ في الاتصال" عند التسجيل
+**الحل:**
+1. تأكد من تفعيل **Email/Password** في Firebase Authentication
+2. تأكد من إضافة النطاق `yasseralayub-cloud.github.io` في Authorized domains
+3. تأكد من تفعيل **Firestore Database**
+4. افتح Developer Console (F12) وتحقق من الأخطاء
+5. جرّب تحديث الصفحة (Ctrl+Shift+R)
+
 ### Email Verification Not Sending
 **الحل:**
 1. تأكد من تفعيل Email/Password في Firebase
@@ -298,4 +340,4 @@ service cloud.firestore {
 ---
 
 **آخر تحديث:** مارس 2026
-**الإصدار:** 2.0 - Enhanced Authentication
+**الإصدار:** 2.1 - Connection Error Fix
