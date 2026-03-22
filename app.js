@@ -4,7 +4,7 @@
 
 'use strict';
 
-// ---- STATE ----
+// ---- STATE ----اا
 let currentLang = 'ar';
 let currentSlide = 0;
 let sliderInterval = null;
