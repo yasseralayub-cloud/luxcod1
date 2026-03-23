@@ -697,7 +697,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedLang = localStorage.getItem('luxcod-lang') || 'ar';
 
   // Initialize all modules
-  initAuthListener(); // Initialize Firebase Auth
   initNavbar();
   initHeroCanvas();
   initScrollReveal();
