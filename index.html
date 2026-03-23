@@ -251,6 +251,23 @@
             <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
           </button>
         </div>
+        <div class="service-card">
+          <div class="service-icon-wrap">
+            <div class="service-icon"><i class="fa-solid fa-robot"></i></div>
+            <div class="service-glow"></div>
+          </div>
+          <h3 data-ar="بوت الرد التلقائي" data-en="WhatsApp Bot">بوت الرد التلقائي</h3>
+          <p data-ar="بوت ذكي يرد على استفسارات عملائك تلقائياً على الواتساب 24/7 — يزيد المبيعات ويوفر الوقت والتكاليف" data-en="Smart bot that automatically responds to customer inquiries on WhatsApp 24/7 — increases sales and saves time and costs">بوت ذكي يرد على استفسارات عملائك تلقائياً على الواتساب 24/7 — يزيد المبيعات ويوفر الوقت والتكاليف</p>
+          <ul class="service-features">
+            <li><i class="fa-solid fa-check"></i><span data-ar="رد فوري 24/7" data-en="24/7 Instant Replies">رد فوري 24/7</span></li>
+            <li><i class="fa-solid fa-check"></i><span data-ar="زيادة المبيعات" data-en="Increase Sales">زيادة المبيعات</span></li>
+            <li><i class="fa-solid fa-check"></i><span data-ar="توفير التكاليف" data-en="Cost Savings">توفير التكاليف</span></li>
+          </ul>
+          <button class="btn btn-primary btn-full" onclick="openWhatsAppChat('whatsapp-bot')" style="margin-top: 20px;">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -357,7 +374,10 @@
             <i class="fa-solid fa-star" data-rating="4"></i>
             <i class="fa-solid fa-star" data-rating="5"></i>
           </div>
-          <textarea id="ratingComment" placeholder="أضف تعليقك هنا..." data-ar-placeholder="أضف تعليقك هنا..." data-en-placeholder="Add your comment here..."></textarea>
+          <input type="text" id="ratingName" placeholder="اسمك" data-ar-placeholder="اسمك" data-en-placeholder="Your Name" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: #1a1f3a; border: 1px solid #2a3050; color: #fff; border-radius: 8px; font-family: inherit;">
+          <textarea id="ratingComment" placeholder="أضف تعليقك هنا..." data-ar-placeholder="أضف تعليقك هنا..." data-en-placeholder="Add your comment here..." style="width: 100%; padding: 12px; margin-bottom: 15px; background: #1a1f3a; border: 1px solid #2a3050; color: #fff; border-radius: 8px; font-family: inherit; min-height: 100px; resize: vertical;"></textarea>
+          <div id="ratingError" style="color: #ef4444; font-size: 14px; margin-bottom: 10px; display: none;"></div>
+          <div id="ratingSuccess" style="color: #10b981; font-size: 14px; margin-bottom: 10px; display: none;"></div>
           <button class="btn btn-primary" onclick="submitRating()" data-ar="إرسال التقييم" data-en="Submit Rating">إرسال التقييم</button>
         </div>
       </div>
@@ -508,6 +528,7 @@
   <script src="contact-email.js"></script>
   <script src="payments.js"></script>
   <script src="services-ordering.js"></script>
+  <script src="whatsapp-integration.js"></script>
   <script src="dashboard.js"></script>
   
   <!-- Main App -->
