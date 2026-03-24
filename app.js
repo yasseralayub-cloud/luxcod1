@@ -1,9 +1,53 @@
 // ============================================================
+// GLOBAL VARIABLES
+// ============================================================
+let currentSlide = 0;
+let isAnimatingSlider = false;
+let sliderInterval;
+let currentLang = localStorage.getItem('lang') || 'ar';
+
+// ============================================================
+// TESTIMONIALS DATA
+// ============================================================
+const TESTIMONIALS_DATA = [
+  {
+    name_ar: "أحمد محمد",
+    name_en: "Ahmed Mohammed",
+    role_ar: "مالك متجر إلكتروني",
+    role_en: "E-commerce Owner",
+    comment_ar: "زيادة المبيعات بنسبة 300% بعد إعادة تصميم الموقع. فريق LuxCod احترافي جداً!",
+    comment_en: "300% increase in sales after website redesign. LuxCod team is very professional!",
+    stars: 5,
+    avatar: "أح"
+  },
+  {
+    name_ar: "فاطمة علي",
+    name_en: "Fatima Ali",
+    role_ar: "مديرة تسويق رقمي",
+    role_en: "Digital Marketing Manager",
+    comment_ar: "الموقع سريع جداً وجميل. عملاؤنا أحبوه من أول نظرة!",
+    comment_en: "The website is very fast and beautiful. Our clients loved it at first sight!",
+    stars: 5,
+    avatar: "فع"
+  },
+  {
+    name_ar: "محمود حسن",
+    name_en: "Mahmoud Hassan",
+    role_ar: "صاحب شركة استشارات",
+    role_en: "Consulting Firm Owner",
+    comment_ar: "أفضل استثمار قمت به. الموقع يعمل 24/7 ويجلب لي عملاء جدد كل يوم.",
+    comment_en: "Best investment I made. The website works 24/7 and brings me new clients daily.",
+    stars: 5,
+    avatar: "مح"
+  }
+];
+
+// ============================================================
 // TESTIMONIALS RENDERING
 // ============================================================
 async function loadAndRenderRatings() {
   const firestoreRatings = await fetchFirestoreRatings();
-  const allRatings = [...firestoreRatings, ...(typeof TESTIMONIALS_DATA !== 'undefined' ? TESTIMONIALS_DATA : [])];
+  const allRatings = [...firestoreRatings, ...TESTIMONIALS_DATA];
   renderTestimonials(allRatings);
 }
 
@@ -36,11 +80,13 @@ async function fetchFirestoreRatings() {
 
 function renderTestimonials(data) {
   const track = document.getElementById('testimonialsTrack');
+  const dotsContainer = document.getElementById('sliderDots');
+  
   if (!track) return;
   
   let displayData = data || [];
   if (displayData.length === 0) {
-    displayData = typeof TESTIMONIALS_DATA !== 'undefined' ? TESTIMONIALS_DATA : [];
+    displayData = TESTIMONIALS_DATA;
   }
   
   if (displayData.length === 0) return;
@@ -48,32 +94,24 @@ function renderTestimonials(data) {
   // مسح المحتوى القديم
   track.innerHTML = "";
   
-  // 🎯 تقسيم التقييمات إلى 3 مجموعات
-  const group1 = [];
-  const group2 = [];
-  const group3 = [];
-  
-  displayData.forEach((t, index) => {
-    if (index % 3 === 0) group1.push(t);
-    else if (index % 3 === 1) group2.push(t);
-    else group3.push(t);
-  });
-  
-  // دالة لإنشاء بطاقة تقييم
-  const createCard = (t) => {
+  // الحل الاحترافي: استخدام appendChild داخل حلقة التكرار
+  displayData.forEach(t => {
     const name = currentLang === 'ar' ? t.name_ar : t.name_en;
     const role = currentLang === 'ar' ? t.role_ar : t.role_en;
     const comment = currentLang === 'ar' ? t.comment_ar : t.comment_en;
     const starsCount = t.stars || 5;
 
+    // إنشاء عنصر البطاقة
     const card = document.createElement('div');
     card.classList.add('testimonial-card');
     
+    // إنشاء النجوم
     let starsHTML = '';
     for (let i = 0; i < starsCount; i++) {
       starsHTML += '<i class="fa-solid fa-star"></i>';
     }
     
+    // إنشاء محتوى البطاقة
     card.innerHTML = `
       <div class="testimonial-inner">
         <div class="testimonial-stars">
@@ -90,48 +128,71 @@ function renderTestimonials(data) {
       </div>
     `;
     
-    return card;
-  };
+    // ✅ أهم سطر: إضافة البطاقة إلى المسار باستخدام appendChild
+    track.appendChild(card);
+  });
+
+  // Dots - مسح القديم وإضافة الجديد
+  if (dotsContainer) {
+    dotsContainer.innerHTML = "";
+    displayData.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.classList.add('dot');
+      if (i === currentSlide) dot.classList.add('active');
+      dot.setAttribute('data-index', i);
+      dotsContainer.appendChild(dot);
+    });
+    
+    // إضافة مستمعات الأحداث للنقاط
+    const dots = dotsContainer.querySelectorAll('.dot');
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        goToSlide(parseInt(dot.getAttribute('data-index')));
+        resetSliderInterval();
+      });
+    });
+  }
+
+  // ابدأ من آخر عنصر (أحدث تقييم)
+  currentSlide = Math.max(0, displayData.length - 1);
+  updateSliderPosition();
   
-  // 🎯 إنشاء 3 مسارات متحركة
-  const container = document.createElement('div');
-  container.classList.add('marquee-container');
-  
-  // المسار الأول: من اليمين لليسار
-  const track1 = document.createElement('div');
-  track1.classList.add('marquee-track', 'marquee-rtl');
-  group1.forEach(t => track1.appendChild(createCard(t)));
-  // تكرار البطاقات لضمان حركة سلسة
-  group1.forEach(t => track1.appendChild(createCard(t)));
-  container.appendChild(track1);
-  
-  // المسار الثاني: من اليسار لليمين
-  const track2 = document.createElement('div');
-  track2.classList.add('marquee-track', 'marquee-ltr');
-  group2.forEach(t => track2.appendChild(createCard(t)));
-  group2.forEach(t => track2.appendChild(createCard(t)));
-  container.appendChild(track2);
-  
-  // المسار الثالث: من اليمين لليسار
-  const track3 = document.createElement('div');
-  track3.classList.add('marquee-track', 'marquee-rtl');
-  group3.forEach(t => track3.appendChild(createCard(t)));
-  group3.forEach(t => track3.appendChild(createCard(t)));
-  container.appendChild(track3);
-  
-  track.appendChild(container);
-  
-  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح في 3 مسارات متحركة`);
+  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح`);
 }
 
 function goToSlide(index) {
-  // ✅ تعطيل منطق التنقل بين الشرائح - لا يوجد سلايدر بعد الآن
-  return;
+  if (isAnimatingSlider) return;
+  isAnimatingSlider = true;
+
+  const track = document.getElementById('testimonialsTrack');
+  const slideCount = track ? track.children.length : 0;
+  if (slideCount === 0) return;
+
+  currentSlide = Math.max(0, Math.min(index, slideCount - 1));
+  updateSliderPosition();
+
+  setTimeout(() => { isAnimatingSlider = false; }, 500);
 }
 
 function updateSliderPosition() {
-  // ✅ تعطيل منطق السلايدر القديم - النظام الجديد يستخدم Marquee
-  return;
+  const track = document.getElementById('testimonialsTrack');
+  if (!track || track.children.length === 0) return;
+
+  // استخدام الاتجاه الصحيح بناءً على اللغة
+  const dir = currentLang === 'en' ? -1 : 1;
+  
+  // التأكد من أن currentSlide ضمن النطاق
+  const slideCount = track.children.length;
+  if (currentSlide >= slideCount) currentSlide = slideCount - 1;
+  if (currentSlide < 0) currentSlide = 0;
+
+  // تحريك السلايدر
+  track.style.transform = `translateX(${dir * currentSlide * 100}%)`;
+
+  // تحديث النقاط
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === currentSlide);
+  });
 }
 
 function initSlider() {
@@ -171,10 +232,29 @@ function resetSliderInterval() {
 }
 
 // ============================================================
-// INITIALIZATION
+// LANGUAGE SWITCHING
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('✅ تم تحميل الصفحة');
+  const langToggle = document.getElementById('langToggle');
+  
+  if (langToggle) {
+    langToggle.addEventListener('click', () => {
+      currentLang = currentLang === 'ar' ? 'en' : 'ar';
+      localStorage.setItem('lang', currentLang);
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+      document.body.classList.toggle('lang-en', currentLang === 'en');
+      
+      // إعادة تحميل التقييمات بلغة جديدة
+      loadAndRenderRatings();
+      updateAllText();
+    });
+  }
+  
+  // تعيين اللغة الأولية
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  if (currentLang === 'en') document.body.classList.add('lang-en');
   
   // تحميل التقييمات
   setTimeout(() => {
@@ -187,3 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAndRenderRatings();
   }, 30000);
 });
+
+// ============================================================
+// TEXT UPDATES (PLACEHOLDER)
+// ============================================================
+function updateAllText() {
+  // يتم تحديث النصوص هنا إذا لزم الأمر
+}
