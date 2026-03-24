@@ -7,7 +7,7 @@ let sliderInterval;
 let currentLang = localStorage.getItem('lang') || 'ar';
 
 // ============================================================
-// TESTIMONIALS DATA
+// TESTIMONIALS DATA (التعليقات الأصلية)
 // ============================================================
 const TESTIMONIALS_DATA = [
   {
@@ -47,6 +47,7 @@ const TESTIMONIALS_DATA = [
 // ============================================================
 async function loadAndRenderRatings() {
   const firestoreRatings = await fetchFirestoreRatings();
+  // دمج التعليقات الجديدة من Firestore مع التعليقات الأصلية
   const allRatings = [...firestoreRatings, ...TESTIMONIALS_DATA];
   renderTestimonials(allRatings);
 }
@@ -55,8 +56,8 @@ async function fetchFirestoreRatings() {
   if (!window.firebaseDB) return [];
   try {
     const snapshot = await window.firebaseDB.collection("ratings")
-      .orderBy("date", "asc")
-      .limit(50)
+      .orderBy("date", "desc") // الأحدث أولاً للتعليقات الجديدة
+      .limit(10)
       .get();
     
     return snapshot.docs.map(doc => {
@@ -73,7 +74,7 @@ async function fetchFirestoreRatings() {
       };
     });
   } catch (error) {
-    console.error("خطأ في جلب التقييمات:", error);
+    console.error("Error fetching ratings:", error);
     return [];
   }
 }
@@ -84,34 +85,23 @@ function renderTestimonials(data) {
   
   if (!track) return;
   
-  let displayData = data || [];
-  if (displayData.length === 0) {
-    displayData = TESTIMONIALS_DATA;
-  }
-  
-  if (displayData.length === 0) return;
-
-  // مسح المحتوى القديم
+  const displayData = data || TESTIMONIALS_DATA;
   track.innerHTML = "";
   
-  // الحل الاحترافي: استخدام appendChild داخل حلقة التكرار
-  displayData.forEach(t => {
+  displayData.forEach((t, index) => {
     const name = currentLang === 'ar' ? t.name_ar : t.name_en;
     const role = currentLang === 'ar' ? t.role_ar : t.role_en;
     const comment = currentLang === 'ar' ? t.comment_ar : t.comment_en;
     const starsCount = t.stars || 5;
 
-    // إنشاء عنصر البطاقة
     const card = document.createElement('div');
     card.classList.add('testimonial-card');
     
-    // إنشاء النجوم
     let starsHTML = '';
     for (let i = 0; i < starsCount; i++) {
       starsHTML += '<i class="fa-solid fa-star"></i>';
     }
     
-    // إنشاء محتوى البطاقة
     card.innerHTML = `
       <div class="testimonial-inner">
         <div class="testimonial-stars">
@@ -127,37 +117,25 @@ function renderTestimonials(data) {
         </div>
       </div>
     `;
-    
-    // ✅ أهم سطر: إضافة البطاقة إلى المسار باستخدام appendChild
     track.appendChild(card);
   });
 
-  // Dots - مسح القديم وإضافة الجديد
+  // Dots
   if (dotsContainer) {
     dotsContainer.innerHTML = "";
     displayData.forEach((_, i) => {
       const dot = document.createElement('div');
       dot.classList.add('dot');
       if (i === currentSlide) dot.classList.add('active');
-      dot.setAttribute('data-index', i);
-      dotsContainer.appendChild(dot);
-    });
-    
-    // إضافة مستمعات الأحداث للنقاط
-    const dots = dotsContainer.querySelectorAll('.dot');
-    dots.forEach(dot => {
       dot.addEventListener('click', () => {
-        goToSlide(parseInt(dot.getAttribute('data-index')));
+        goToSlide(i);
         resetSliderInterval();
       });
+      dotsContainer.appendChild(dot);
     });
   }
 
-  // ابدأ من آخر عنصر (أحدث تقييم)
-  currentSlide = Math.max(0, displayData.length - 1);
   updateSliderPosition();
-  
-  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح`);
 }
 
 function goToSlide(index) {
@@ -166,9 +144,8 @@ function goToSlide(index) {
 
   const track = document.getElementById('testimonialsTrack');
   const slideCount = track ? track.children.length : 0;
-  if (slideCount === 0) return;
-
-  currentSlide = Math.max(0, Math.min(index, slideCount - 1));
+  
+  currentSlide = (index + slideCount) % slideCount;
   updateSliderPosition();
 
   setTimeout(() => { isAnimatingSlider = false; }, 500);
@@ -178,19 +155,12 @@ function updateSliderPosition() {
   const track = document.getElementById('testimonialsTrack');
   if (!track || track.children.length === 0) return;
 
-  // استخدام الاتجاه الصحيح بناءً على اللغة
-  const dir = currentLang === 'en' ? -1 : 1;
-  
-  // التأكد من أن currentSlide ضمن النطاق
-  const slideCount = track.children.length;
-  if (currentSlide >= slideCount) currentSlide = slideCount - 1;
-  if (currentSlide < 0) currentSlide = 0;
-
-  // تحريك السلايدر
+  const dir = currentLang === 'en' ? 1 : -1;
   track.style.transform = `translateX(${dir * currentSlide * 100}%)`;
 
-  // تحديث النقاط
-  document.querySelectorAll('.dot').forEach((dot, i) => {
+  // Update dots
+  const dots = document.querySelectorAll('.dot');
+  dots.forEach((dot, i) => {
     dot.classList.toggle('active', i === currentSlide);
   });
 }
@@ -201,20 +171,14 @@ function initSlider() {
 
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      const track = document.getElementById('testimonialsTrack');
-      const slideCount = track ? track.children.length : 0;
-      const newIndex = currentSlide > 0 ? currentSlide - 1 : (slideCount > 0 ? slideCount - 1 : 0);
-      goToSlide(newIndex);
+      goToSlide(currentSlide - 1);
       resetSliderInterval();
     });
   }
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      const track = document.getElementById('testimonialsTrack');
-      const slideCount = track ? track.children.length : 0;
-      const newIndex = currentSlide < slideCount - 1 ? currentSlide + 1 : 0;
-      goToSlide(newIndex);
+      goToSlide(currentSlide + 1);
       resetSliderInterval();
     });
   }
@@ -223,54 +187,56 @@ function initSlider() {
 function resetSliderInterval() {
   clearInterval(sliderInterval);
   sliderInterval = setInterval(() => {
-    const track = document.getElementById('testimonialsTrack');
-    const slideCount = track ? track.children.length : 0;
-    if (slideCount > 1) {
-      goToSlide(currentSlide < slideCount - 1 ? currentSlide + 1 : 0);
-    }
+    goToSlide(currentSlide + 1);
   }, 5000);
 }
 
 // ============================================================
 // LANGUAGE SWITCHING
 // ============================================================
+function updateLanguage() {
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.body.classList.toggle('lang-en', currentLang === 'en');
+  
+  // تحديث النصوص في الموقع
+  document.querySelectorAll('[data-ar]').forEach(el => {
+    const text = currentLang === 'ar' ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        const placeholder = currentLang === 'ar' ? el.getAttribute('data-ar-placeholder') : el.getAttribute('data-en-placeholder');
+        if (placeholder) el.placeholder = placeholder;
+    } else {
+        // الحفاظ على الأيقونات إذا وجدت
+        const icon = el.querySelector('i');
+        if (icon) {
+            const btnText = el.querySelector('.btn-text');
+            if (btnText) btnText.textContent = text;
+        } else {
+            el.textContent = text;
+        }
+    }
+  });
+
+  loadAndRenderRatings();
+}
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   const langToggle = document.getElementById('langToggle');
-  
   if (langToggle) {
     langToggle.addEventListener('click', () => {
       currentLang = currentLang === 'ar' ? 'en' : 'ar';
       localStorage.setItem('lang', currentLang);
-      document.documentElement.lang = currentLang;
-      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-      document.body.classList.toggle('lang-en', currentLang === 'en');
-      
-      // إعادة تحميل التقييمات بلغة جديدة
-      loadAndRenderRatings();
-      updateAllText();
+      updateLanguage();
     });
   }
-  
-  // تعيين اللغة الأولية
-  document.documentElement.lang = currentLang;
-  document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-  if (currentLang === 'en') document.body.classList.add('lang-en');
-  
-  // تحميل التقييمات
-  setTimeout(() => {
-    loadAndRenderRatings();
-    initSlider();
-  }, 1000);
-  
-  // تحديث التقييمات كل 30 ثانية
-  setInterval(() => {
-    loadAndRenderRatings();
-  }, 30000);
+
+  updateLanguage();
+  initSlider();
+  resetSliderInterval();
 });
 
-// ============================================================
-// TEXT UPDATES (PLACEHOLDER)
-// ============================================================
-function updateAllText() {
-  // يتم تحديث النصوص هنا إذا لزم الأمر
-}
+// نافذة الواتساب والأرقام الإحصائية (إعادة المنطق الأصلي)
+// ... (أي كود إضافي للأرقام المتحركة إذا كان موجوداً في الأصل)

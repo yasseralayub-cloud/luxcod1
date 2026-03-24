@@ -1,240 +1,142 @@
-/* ============================================================
-   LuxCod - Ratings System (Fixed & Robust Version)
-   ============================================================ */
+// ============================================================
+// LUXCOD RATINGS SYSTEM (FIREBASE INTEGRATION)
+// ============================================================
 
-let currentRating = 0;
+// قائمة الكلمات النابية (فلترة المحتوى)
+const PROFANITY_LIST = [
+    'كلب', 'حمار', 'غبي', 'حقير', 'تفه', 'لعن', 'كذاب', 'نصاب', 'سارق',
+    'dog', 'donkey', 'stupid', 'bastard', 'curse', 'liar', 'scammer', 'thief',
+    'شتم', 'سب', 'قذر', 'fuck', 'shit', 'asshole', 'bitch'
+];
 
-// Initialize Rating System
-function initRatings() {
-    console.log('🔄 Initializing ratings system...');
-    
-    const ratingStars = document.getElementById("ratingStars");
-    if (!ratingStars) {
-        console.error('❌ CRITICAL: ratingStars element not found');
-        return;
-    }
-    
-    const stars = ratingStars.querySelectorAll(".fa-star");
-    
-    stars.forEach(star => {
-        // Remove existing listeners to prevent duplicates
-        const newStar = star.cloneNode(true);
-        star.parentNode.replaceChild(newStar, star);
-        
-        newStar.addEventListener("click", (e) => {
-            e.stopPropagation();
-            currentRating = parseInt(newStar.getAttribute("data-rating"));
-            console.log(`⭐ Rating selected: ${currentRating}`);
-            updateStars();
-        });
-        
-        newStar.addEventListener("mouseover", () => {
-            const hoverRating = parseInt(newStar.getAttribute("data-rating"));
-            const allStars = document.querySelectorAll("#ratingStars .fa-star");
-            allStars.forEach(s => {
-                if (parseInt(s.getAttribute("data-rating")) <= hoverRating) {
-                    s.style.color = "#fbbf24";
-                } else {
-                    s.style.color = "#666";
-                }
-            });
-        });
-    });
-    
-    ratingStars.addEventListener("mouseleave", updateStars);
+let currentRatingValue = 5; // الافتراضي 5 نجوم
 
-    // Initial load
-    loadAndRenderRatings();
-    
-    console.log('✅ Ratings system initialization complete');
+function containsProfanity(text) {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+    return PROFANITY_LIST.some(word => lowerText.includes(word));
 }
 
-function updateStars() {
-    const stars = document.querySelectorAll("#ratingStars .fa-star");
+// تهيئة النجوم عند تحميل الصفحة
+function initRatingStars() {
+    const stars = document.querySelectorAll('#ratingStars i');
+    if (!stars.length) return;
+
     stars.forEach(star => {
-        const rating = parseInt(star.getAttribute("data-rating"));
-        if (rating <= currentRating) {
-            star.style.color = "#fbbf24";
+        star.addEventListener('click', () => {
+            currentRatingValue = parseInt(star.getAttribute('data-rating'));
+            updateStarsUI(currentRatingValue);
+        });
+        
+        star.addEventListener('mouseover', () => {
+            const hoverRating = parseInt(star.getAttribute('data-rating'));
+            updateStarsUI(hoverRating);
+        });
+    });
+
+    const starsContainer = document.getElementById('ratingStars');
+    if (starsContainer) {
+        starsContainer.addEventListener('mouseleave', () => {
+            updateStarsUI(currentRatingValue);
+        });
+    }
+    
+    // التفعيل الأولي لـ 5 نجوم
+    updateStarsUI(5);
+}
+
+function updateStarsUI(rating) {
+    const stars = document.querySelectorAll('#ratingStars i');
+    stars.forEach((s, i) => {
+        if (i < rating) {
+            s.classList.add('active');
+            s.style.color = '#fbbf24';
         } else {
-            star.style.color = "#666";
+            s.classList.remove('active');
+            s.style.color = '#666';
         }
     });
 }
 
-// Global submit function (exposed to window)
+// إرسال التقييم إلى Firestore
 async function submitRating() {
-    console.log('🚀 submitRating function called');
+    const nameInput = document.getElementById('ratingName');
+    const commentInput = document.getElementById('ratingComment');
+    const errorDiv = document.getElementById('ratingError');
+    const successDiv = document.getElementById('ratingSuccess');
     
-    const nameEl = document.getElementById("ratingName");
-    const commentEl = document.getElementById("ratingComment");
-    const errorDiv = document.getElementById("ratingError");
-    const successDiv = document.getElementById("ratingSuccess");
-    const submitBtn = document.getElementById("ratingSubmitBtn");
+    // إخفاء الرسائل السابقة
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
+
+    const name = nameInput ? nameInput.value.trim() : "";
+    const comment = commentInput ? commentInput.value.trim() : "";
     
-    if (!nameEl || !commentEl) {
-        console.error('❌ Form elements not found');
+    // التحقق من البيانات
+    if (!name || !comment) {
+        showRatingError(window.currentLang === 'ar' ? "يرجى إدخال الاسم والتعليق." : "Please enter your name and comment.");
         return;
     }
 
-    const name = nameEl.value.trim();
-    const comment = commentEl.value.trim();
-    
-    // Reset messages
-    errorDiv.style.display = 'none';
-    successDiv.style.display = 'none';
-    
-    // Validation
-    if (!name || !comment || currentRating === 0) {
-        const message = currentLang === 'ar' 
-            ? 'يرجى ملء جميع الحقول واختيار تقييم.' 
-            : 'Please fill all fields and select a rating.';
-        
-        showError(message);
+    // التحقق من الكلمات النابية
+    if (containsProfanity(name) || containsProfanity(comment)) {
+        showRatingError(window.currentLang === 'ar' ? "عذراً، لا يسمح باستخدام كلمات غير لائقة." : "Sorry, profanity is not allowed.");
         return;
     }
-    
-    // Profanity Filter
-    if (typeof hasProfanity === 'function' && hasProfanity(comment)) {
-        const message = currentLang === 'ar'
-            ? 'عذراً، التعليق يحتوي على كلمات غير مسموح بها. يرجى تعديله.'
-            : 'Sorry, the comment contains inappropriate words. Please edit it.';
-        
-        showError(message);
+
+    // التأكد من تهيئة Firebase
+    if (!window.firebaseDB) {
+        showRatingError(window.currentLang === 'ar' ? "خطأ في الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً." : "Database connection error. Please try again later.");
         return;
     }
-    
+
     try {
-        // Disable button
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.7';
-            submitBtn.textContent = currentLang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
-        }
-
-        // Check Firebase
-        if (!window.firebaseDB) {
-            // Try one last time to get it from global firebase
-            if (window.firebase && typeof window.firebase.firestore === 'function') {
-                window.firebaseDB = window.firebase.firestore();
-            } else {
-                throw new Error("Firestore not initialized");
-            }
-        }
-
-        const ratingData = {
+        await window.firebaseDB.collection("ratings").add({
             name: name,
             comment: comment,
-            stars: currentRating,
+            stars: currentRatingValue,
             date: new Date().toISOString(),
             approved: true
-        };
+        });
+
+        // نجاح الإرسال
+        if (successDiv) {
+            successDiv.textContent = window.currentLang === 'ar' ? "تم إرسال تقييمك بنجاح! شكراً لك." : "Rating submitted successfully! Thank you.";
+            successDiv.style.display = 'block';
+        }
         
-        console.log('💾 Saving to Firestore:', ratingData);
-        
-        await window.firebaseDB.collection("ratings").add(ratingData);
-        
-        console.log('✅ Success! Rating added.');
-        
-        // Show success
-        successDiv.textContent = currentLang === "ar" 
-            ? "شكراً لك! تم نشر تقييمك بنجاح." 
-            : "Thank you! Your review has been published.";
-        successDiv.style.display = "block";
-        
-        // Clear form
-        nameEl.value = "";
-        commentEl.value = "";
-        currentRating = 0;
-        updateStars();
-        
-        // الحل الصحيح: استدعاء دالة التحميل والعرض فوراً بعد نجاح الإرسال
-        console.log('🔄 جاري تحديث قائمة التقييمات...');
+        // مسح الحقول
+        if (nameInput) nameInput.value = "";
+        if (commentInput) commentInput.value = "";
+        currentRatingValue = 5;
+        updateStarsUI(5);
+
+        // تحديث السلايدر إذا كان متاحاً
         if (typeof loadAndRenderRatings === 'function') {
-            await loadAndRenderRatings();
-        } else if (typeof renderTestimonials === 'function') {
-            await renderTestimonials();
+            loadAndRenderRatings();
         }
-        
-        // Hide success after delay
+
+        // إخفاء رسالة النجاح بعد فترة
         setTimeout(() => {
-            successDiv.style.display = "none";
+            if (successDiv) successDiv.style.display = 'none';
         }, 5000);
-        
+
     } catch (error) {
-        console.error("❌ Firestore Error:", error);
-        showError(currentLang === "ar" 
-            ? "حدث خطأ أثناء الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً." 
-            : "Database connection error. Please try again later.");
-    } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-            submitBtn.textContent = currentLang === 'ar' ? 'إرسال التقييم' : 'Submit Rating';
-        }
+        console.error("Error adding rating: ", error);
+        showRatingError(window.currentLang === 'ar' ? "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى." : "An error occurred. Please try again.");
     }
 }
 
-function showError(msg) {
-    const errorDiv = document.getElementById("ratingError");
+function showRatingError(msg) {
+    const errorDiv = document.getElementById('ratingError');
     if (errorDiv) {
         errorDiv.textContent = msg;
         errorDiv.style.display = 'block';
         errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    console.warn('⚠️ User Error:', msg);
-}
-
-// Load ratings
-async function loadAndRenderRatings() {
-    try {
-        if (!window.firebaseDB) return;
-
-        const snapshot = await window.firebaseDB.collection("ratings")
-            .orderBy("date", "asc")
-            .limit(50)
-            .get();
-        
-        const ratings = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            ratings.push({
-                id: doc.id,
-                name_ar: data.name,
-                name_en: data.name,
-                role_ar: "عميل",
-                role_en: "Client",
-                comment_ar: data.comment,
-                comment_en: data.comment,
-                stars: data.stars || 5,
-                avatar: data.name.charAt(0).toUpperCase()
-            });
-        });
-
-        if (ratings.length > 0) {
-            window.TESTIMONIALS_DATA = ratings;
-            if (typeof renderTestimonials === 'function') {
-                console.log('🔄 Re-rendering testimonials with new data...');
-                await renderTestimonials();
-            }
-        }
-    } catch (e) {
-        console.error("Error loading ratings:", e);
+    } else {
+        alert(msg);
     }
 }
 
-// Attach to window for global access
-window.submitRating = submitRating;
-
-// Initialization
-document.addEventListener("DOMContentLoaded", () => {
-    // Wait for potential firebase-config initialization
-    setTimeout(initRatings, 1000);
-    
-    const btn = document.getElementById("ratingSubmitBtn");
-    if (btn) {
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            submitRating();
-        });
-    }
-});
+// تهيئة عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', initRatingStars);

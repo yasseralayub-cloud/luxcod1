@@ -1,6 +1,6 @@
-// Firebase Configuration
+// Firebase Configuration for luxcod-ratings
 const firebaseConfig = {
-  apiKey: "AIzaSyD46R7Mei7ANhzqSyihJVtxO6YQsiZls8s",
+  apiKey: "*****",
   authDomain: "luxcod-ratings.firebaseapp.com",
   projectId: "luxcod-ratings",
   storageBucket: "luxcod-ratings.firebasestorage.app",
@@ -12,26 +12,21 @@ const firebaseConfig = {
 // Initialize Firebase with error handling
 function initializeFirebase() {
   try {
-    // Check if Firebase is available
     if (typeof firebase === 'undefined') {
       console.error('❌ Firebase SDK not loaded');
       return false;
     }
     
     // Check if already initialized
-    let app;
     if (firebase.apps.length === 0) {
-      app = firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp(firebaseConfig);
       console.log('✅ Firebase initialized successfully');
     } else {
-      app = firebase.app();
       console.log('✅ Firebase already initialized');
     }
     
-    // Get Firebase services (using compat namespaced API)
-    window.firebaseAuth = firebase.auth();
+    // Get Firebase services
     window.firebaseDB = firebase.firestore();
-    window.firebaseStorage = firebase.storage();
     
     // Global firebase reference
     window.firebase = firebase;
