@@ -414,11 +414,9 @@ async function renderTestimonials() {
   if (displayData.length === 0) return;
 
   // مسح المحتوى القديم قبل إعادة التحميل
-  while (track.firstChild) {
-    track.removeChild(track.firstChild);
-  }
+  track.innerHTML = "";
   
-  // استخدام appendChild لإضافة العناصر بدلاً من innerHTML
+  // الحل الاحترافي: استخدام appendChild داخل حلقة التكرار
   displayData.forEach(t => {
     const name = currentLang === 'ar' ? t.name_ar : t.name_en;
     const role = currentLang === 'ar' ? t.role_ar : t.role_en;
@@ -427,7 +425,7 @@ async function renderTestimonials() {
 
     // إنشاء عنصر البطاقة
     const card = document.createElement('div');
-    card.className = 'testimonial-card';
+    card.classList.add('testimonial-card');
     
     // إنشاء النجوم
     let starsHTML = '';
@@ -452,7 +450,7 @@ async function renderTestimonials() {
       </div>
     `;
     
-    // إضافة البطاقة إلى المسار
+    // ✅ أهم سطر: إضافة البطاقة إلى المسار باستخدام appendChild
     track.appendChild(card);
   });
 
@@ -461,13 +459,15 @@ async function renderTestimonials() {
     dotsContainer.innerHTML = "";
     displayData.forEach((_, i) => {
       const dot = document.createElement('div');
-      dot.className = `dot ${i === currentSlide ? 'active' : ''}`;
+      dot.classList.add('dot');
+      if (i === currentSlide) dot.classList.add('active');
       dot.setAttribute('data-index', i);
       dotsContainer.appendChild(dot);
     });
     
     // إضافة مستمعات الأحداث للنقاط
-    dotsContainer.querySelectorAll('.dot').forEach(dot => {
+    const dots = dotsContainer.querySelectorAll('.dot');
+    dots.forEach(dot => {
       dot.addEventListener('click', () => {
         goToSlide(parseInt(dot.getAttribute('data-index')));
         resetSliderInterval();
@@ -479,7 +479,7 @@ async function renderTestimonials() {
   currentSlide = 0;
   updateSliderPosition();
   
-  console.log(`✅ Rendered ${displayData.length} testimonials successfully`);
+  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح`);
 }
 function goToSlide(index) {
   if (isAnimatingSlider) return;

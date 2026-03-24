@@ -147,8 +147,11 @@ async function submitRating() {
         currentRating = 0;
         updateStars();
         
-        // Refresh slider
-        if (typeof renderTestimonials === 'function') {
+        // الحل الصحيح: استدعاء دالة التحميل والعرض فوراً بعد نجاح الإرسال
+        console.log('🔄 جاري تحديث قائمة التقييمات...');
+        if (typeof loadAndRenderRatings === 'function') {
+            await loadAndRenderRatings();
+        } else if (typeof renderTestimonials === 'function') {
             await renderTestimonials();
         }
         
