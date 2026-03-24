@@ -398,37 +398,58 @@ async function renderTestimonials() {
   
   if (displayData.length === 0) return;
 
-  track.innerHTML = displayData.map(t => {
+  // مسح القديم فقط قبل إعادة التحميل
+  track.innerHTML = "";
+  
+  // استخدام appendChild لإضافة العناصر بدلاً من innerHTML
+  displayData.forEach(t => {
     const name = currentLang === 'ar' ? t.name_ar : t.name_en;
     const role = currentLang === 'ar' ? t.role_ar : t.role_en;
     const comment = currentLang === 'ar' ? t.comment_ar : t.comment_en;
-    const stars = '★'.repeat(t.stars || 5);
+    const starsCount = t.stars || 5;
 
-    return `
-      <div class="testimonial-card">
-        <div class="testimonial-inner">
-          <div class="testimonial-stars">
-            ${Array(t.stars || 5).fill('<i class="fa-solid fa-star"></i>').join('')}
-          </div>
-          <p class="testimonial-comment">"${comment}"</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">${t.avatar || name.slice(0,2)}</div>
-            <div class="author-info">
-              <h4>${name}</h4>
-              <span>${role}</span>
-            </div>
+    // إنشاء عنصر البطاقة
+    const card = document.createElement('div');
+    card.className = 'testimonial-card';
+    
+    // إنشاء النجوم
+    let starsHTML = '';
+    for (let i = 0; i < starsCount; i++) {
+      starsHTML += '<i class="fa-solid fa-star"></i>';
+    }
+    
+    // إنشاء محتوى البطاقة
+    card.innerHTML = `
+      <div class="testimonial-inner">
+        <div class="testimonial-stars">
+          ${starsHTML}
+        </div>
+        <p class="testimonial-comment">"${comment}"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">${t.avatar || name.slice(0,2)}</div>
+          <div class="author-info">
+            <h4>${name}</h4>
+            <span>${role}</span>
           </div>
         </div>
       </div>
     `;
-  }).join('');
+    
+    // إضافة البطاقة إلى المسار
+    track.appendChild(card);
+  });
 
-  // Dots
+  // Dots - مسح القديم وإضافة  // Dots - مسح القديم وإضافة الجديد
   if (dotsContainer) {
-    dotsContainer.innerHTML = displayData.map((_, i) =>
-      `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`
-    ).join('');
-
+    dotsContainer.innerHTML = "";
+    displayData.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = `dot ${i === currentSlide ? 'active' : ''}`;
+      dot.setAttribute('data-index', i);
+      dotsContainer.appendChild(dot);
+    });
+    
+    // إضافة مستمعات الأحداث للنقاط
     dotsContainer.querySelectorAll('.dot').forEach(dot => {
       dot.addEventListener('click', () => {
         goToSlide(parseInt(dot.getAttribute('data-index')));
@@ -437,9 +458,10 @@ async function renderTestimonials() {
     });
   }
 
+  // إعادة تعيين السلايد إلى البداية عند التحديث
+  currentSlide = 0;
   updateSliderPosition();
 }
-
 function goToSlide(index) {
   if (isAnimatingSlider) return;
   isAnimatingSlider = true;

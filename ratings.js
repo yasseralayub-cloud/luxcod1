@@ -210,6 +210,7 @@ async function loadAndRenderRatings() {
         if (ratings.length > 0) {
             window.TESTIMONIALS_DATA = ratings;
             if (typeof renderTestimonials === 'function') {
+                console.log('🔄 Re-rendering testimonials with new data...');
                 await renderTestimonials();
             }
         }
