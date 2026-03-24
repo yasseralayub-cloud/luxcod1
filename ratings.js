@@ -1,5 +1,5 @@
 /* ============================================================
-   LuxCod - Ratings System (Firebase Firestore Integration)
+   LuxCod - Ratings System (Fixed & Robust Version)
    ============================================================ */
 
 let currentRating = 0;
@@ -10,23 +10,28 @@ function initRatings() {
     
     const ratingStars = document.getElementById("ratingStars");
     if (!ratingStars) {
-        console.warn('⚠️ ratingStars element not found');
+        console.error('❌ CRITICAL: ratingStars element not found');
         return;
     }
     
     const stars = ratingStars.querySelectorAll(".fa-star");
-    console.log(`✅ Found ${stars.length} rating stars`);
     
     stars.forEach(star => {
-        star.addEventListener("click", () => {
-            currentRating = parseInt(star.getAttribute("data-rating"));
+        // Remove existing listeners to prevent duplicates
+        const newStar = star.cloneNode(true);
+        star.parentNode.replaceChild(newStar, star);
+        
+        newStar.addEventListener("click", (e) => {
+            e.stopPropagation();
+            currentRating = parseInt(newStar.getAttribute("data-rating"));
             console.log(`⭐ Rating selected: ${currentRating}`);
             updateStars();
         });
         
-        star.addEventListener("mouseover", () => {
-            const hoverRating = parseInt(star.getAttribute("data-rating"));
-            stars.forEach(s => {
+        newStar.addEventListener("mouseover", () => {
+            const hoverRating = parseInt(newStar.getAttribute("data-rating"));
+            const allStars = document.querySelectorAll("#ratingStars .fa-star");
+            allStars.forEach(s => {
                 if (parseInt(s.getAttribute("data-rating")) <= hoverRating) {
                     s.style.color = "#fbbf24";
                 } else {
@@ -38,10 +43,10 @@ function initRatings() {
     
     ratingStars.addEventListener("mouseleave", updateStars);
 
-    // Load initial ratings
+    // Initial load
     loadAndRenderRatings();
     
-    console.log('✅ Ratings system initialized');
+    console.log('✅ Ratings system initialization complete');
 }
 
 function updateStars() {
@@ -56,14 +61,27 @@ function updateStars() {
     });
 }
 
-// Submit Rating
+// Global submit function (exposed to window)
 async function submitRating() {
-    console.log('📝 Attempting to submit rating...');
+    console.log('🚀 submitRating function called');
     
-    const name = document.getElementById("ratingName").value.trim();
-    const comment = document.getElementById("ratingComment").value.trim();
+    const nameEl = document.getElementById("ratingName");
+    const commentEl = document.getElementById("ratingComment");
     const errorDiv = document.getElementById("ratingError");
     const successDiv = document.getElementById("ratingSuccess");
+    const submitBtn = document.getElementById("ratingSubmitBtn");
+    
+    if (!nameEl || !commentEl) {
+        console.error('❌ Form elements not found');
+        return;
+    }
+
+    const name = nameEl.value.trim();
+    const comment = commentEl.value.trim();
+    
+    // Reset messages
+    errorDiv.style.display = 'none';
+    successDiv.style.display = 'none';
     
     // Validation
     if (!name || !comment || currentRating === 0) {
@@ -71,38 +89,38 @@ async function submitRating() {
             ? 'يرجى ملء جميع الحقول واختيار تقييم.' 
             : 'Please fill all fields and select a rating.';
         
-        console.warn('❌ Validation failed:', { name: !!name, comment: !!comment, rating: currentRating });
-        
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        successDiv.style.display = 'none';
+        showError(message);
         return;
     }
     
-    // Check for profanity
+    // Profanity Filter
     if (typeof hasProfanity === 'function' && hasProfanity(comment)) {
         const message = currentLang === 'ar'
-            ? 'التعليق يحتوي على كلمات غير مناسبة. يرجى تعديل تعليقك.'
-            : 'Comment contains inappropriate words. Please edit your comment.';
+            ? 'عذراً، التعليق يحتوي على كلمات غير مسموح بها. يرجى تعديله.'
+            : 'Sorry, the comment contains inappropriate words. Please edit it.';
         
-        console.warn('❌ Profanity detected in comment');
-        
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        successDiv.style.display = 'none';
+        showError(message);
         return;
     }
     
     try {
-        errorDiv.style.display = "none";
-        
-        // Check Firebase initialization
-        if (!window.firebaseDB) {
-            throw new Error("Firebase DB not initialized");
+        // Disable button
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            submitBtn.textContent = currentLang === 'ar' ? 'جاري الإرسال...' : 'Sending...';
         }
 
-        console.log('💾 Saving rating to Firestore...');
-        
+        // Check Firebase
+        if (!window.firebaseDB) {
+            // Try one last time to get it from global firebase
+            if (window.firebase && typeof window.firebase.firestore === 'function') {
+                window.firebaseDB = window.firebase.firestore();
+            } else {
+                throw new Error("Firestore not initialized");
+            }
+        }
+
         const ratingData = {
             name: name,
             comment: comment,
@@ -111,57 +129,67 @@ async function submitRating() {
             approved: true
         };
         
-        const docRef = await window.firebaseDB.collection("ratings").add(ratingData);
+        console.log('💾 Saving to Firestore:', ratingData);
         
-        console.log('✅ Rating saved successfully:', docRef.id);
+        await window.firebaseDB.collection("ratings").add(ratingData);
         
+        console.log('✅ Success! Rating added.');
+        
+        // Show success
         successDiv.textContent = currentLang === "ar" 
-            ? "شكراً لتقييمك! تم إضافة تقييمك بنجاح" 
-            : "Thank you for your rating! Your review has been added successfully";
+            ? "شكراً لك! تم نشر تقييمك بنجاح." 
+            : "Thank you! Your review has been published.";
         successDiv.style.display = "block";
         
         // Clear form
-        document.getElementById("ratingName").value = "";
-        document.getElementById("ratingComment").value = "";
+        nameEl.value = "";
+        commentEl.value = "";
         currentRating = 0;
         updateStars();
         
-        // Refresh the testimonials slider
-        console.log('🔄 Refreshing testimonials...');
+        // Refresh slider
         if (typeof renderTestimonials === 'function') {
             await renderTestimonials();
         }
         
-        // Hide success message after 3 seconds
+        // Hide success after delay
         setTimeout(() => {
             successDiv.style.display = "none";
-        }, 3000);
+        }, 5000);
         
     } catch (error) {
-        console.error("❌ Rating error:", error);
-        errorDiv.textContent = currentLang === "ar" 
-            ? "حدث خطأ. يرجى المحاولة مرة أخرى" 
-            : "An error occurred. Please try again";
-        errorDiv.style.display = "block";
+        console.error("❌ Firestore Error:", error);
+        showError(currentLang === "ar" 
+            ? "حدث خطأ أثناء الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً." 
+            : "Database connection error. Please try again later.");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.textContent = currentLang === 'ar' ? 'إرسال التقييم' : 'Submit Rating';
+        }
     }
 }
 
-// Load and Render Ratings from Firestore to Testimonials Slider
+function showError(msg) {
+    const errorDiv = document.getElementById("ratingError");
+    if (errorDiv) {
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    console.warn('⚠️ User Error:', msg);
+}
+
+// Load ratings
 async function loadAndRenderRatings() {
     try {
-        console.log('📥 Loading ratings from Firestore...');
-        
-        if (!window.firebaseDB) {
-            console.warn('⚠️ Firebase DB not initialized yet');
-            return;
-        }
+        if (!window.firebaseDB) return;
 
         const snapshot = await window.firebaseDB.collection("ratings")
             .orderBy("date", "desc")
             .limit(10)
             .get();
-        
-        console.log(`✅ Loaded ${snapshot.docs.length} ratings`);
         
         const ratings = [];
         snapshot.forEach(doc => {
@@ -179,44 +207,30 @@ async function loadAndRenderRatings() {
             });
         });
 
-        // Update the global TESTIMONIALS_DATA if it exists
         if (ratings.length > 0) {
-            console.log('📊 Updating testimonials display...');
             window.TESTIMONIALS_DATA = ratings;
-            
             if (typeof renderTestimonials === 'function') {
                 await renderTestimonials();
             }
-        } else {
-            console.log('ℹ️ No ratings found, using default testimonials');
         }
-        
-    } catch (error) {
-        console.error("❌ Error loading ratings:", error);
+    } catch (e) {
+        console.error("Error loading ratings:", e);
     }
 }
 
-// Initialize on page load
-document.addEventListener("DOMContentLoaded", () => {
-    console.log('🚀 DOM Content Loaded - Initializing ratings...');
-    
-    // Wait a bit for Firebase to initialize
-    setTimeout(() => {
-        initRatings();
-        
-        const submitBtn = document.getElementById("ratingSubmitBtn") ||
-                         document.querySelector("button[data-ar='إرسال التقييم']");
-        
-        if (submitBtn) {
-            console.log('✅ Submit button found, attaching listener');
-            submitBtn.addEventListener("click", (e) => {
-                e.preventDefault();
-                submitRating();
-            });
-        } else {
-            console.warn('⚠️ Submit button not found');
-        }
-    }, 500);
-});
+// Attach to window for global access
+window.submitRating = submitRating;
 
-console.log("✅ Ratings System with Firebase Firestore loaded successfully");
+// Initialization
+document.addEventListener("DOMContentLoaded", () => {
+    // Wait for potential firebase-config initialization
+    setTimeout(initRatings, 1000);
+    
+    const btn = document.getElementById("ratingSubmitBtn");
+    if (btn) {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            submitRating();
+        });
+    }
+});

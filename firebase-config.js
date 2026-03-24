@@ -12,20 +12,23 @@ const firebaseConfig = {
 // Initialize Firebase with error handling
 function initializeFirebase() {
   try {
+    // Check if Firebase is available
     if (typeof firebase === 'undefined') {
       console.error('❌ Firebase SDK not loaded');
       return false;
     }
     
     // Check if already initialized
+    let app;
     if (firebase.apps.length === 0) {
-      firebase.initializeApp(firebaseConfig);
+      app = firebase.initializeApp(firebaseConfig);
       console.log('✅ Firebase initialized successfully');
     } else {
+      app = firebase.app();
       console.log('✅ Firebase already initialized');
     }
     
-    // Get Firebase services
+    // Get Firebase services (using compat namespaced API)
     window.firebaseAuth = firebase.auth();
     window.firebaseDB = firebase.firestore();
     window.firebaseStorage = firebase.storage();
