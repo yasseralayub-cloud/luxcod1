@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- EmailJS Library -->
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+
   <meta name="description" content="LuxCod - وكالة رقمية متخصصة في تصميم المواقع وصفحات الهبوط وتحسين تجربة المستخدم" />
   <meta name="keywords" content="تصميم مواقع, صفحات هبوط, UI/UX, وكالة رقمية, LuxCod" />
   <title>LuxCod | نبني تجارب رقمية تنمو بها أعمالك</title>
@@ -524,7 +523,7 @@
   <!-- Features -->
   <script src="auth.js"></script>
   <script src="ratings.js"></script>
-  <script src="contact-email.js"></script>
+  <script src="contact-form-handler.js"></script>
   <script src="payments.js"></script>
   <script src="services-ordering.js"></script>
   <script src="whatsapp-integration.js"></script>
@@ -533,16 +532,6 @@
   <!-- Main App -->
   <script src="app.js"></script>
 
-  <!-- EmailJS Initialization -->
-  <script>
-    (function(){
-      if (typeof emailjs !== 'undefined') {
-        emailjs.init("njvn9St5gAnWLOI61");
-        console.log('✅ EmailJS initialized successfully');
-      } else {
-        console.error('❌ EmailJS library not loaded');
-      }
-    })();
-  </script>
+
 </body>
 </html>
