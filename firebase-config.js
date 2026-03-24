@@ -1,12 +1,12 @@
 // Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB8wFMz6xtLVtkpfVRac_wM6Ucaan6VOVk",
-  authDomain: "luxcode-167ee.firebaseapp.com",
-  projectId: "luxcode-167ee",
-  storageBucket: "luxcode-167ee.firebasestorage.app",
-  messagingSenderId: "1090399047900",
-  appId: "1:1090399047900:web:dc39a3feb818e05217a419",
-  measurementId: "G-PW8TY4VSV8"
+  apiKey: "AIzaSyD46R7Mei7ANhzqSyihJVtxO6YQsiZls8s",
+  authDomain: "luxcod-ratings.firebaseapp.com",
+  projectId: "luxcod-ratings",
+  storageBucket: "luxcod-ratings.firebasestorage.app",
+  messagingSenderId: "195575730935",
+  appId: "1:195575730935:web:7598414c4134e71f04b9f2",
+  measurementId: "G-HB3PTKE582"
 };
 
 // Initialize Firebase with error handling

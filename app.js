@@ -359,12 +359,46 @@ function renderPortfolio() {
 // ============================================================
 // TESTIMONIALS SLIDER
 // ============================================================
-function renderTestimonials() {
+async function fetchFirestoreRatings() {
+  if (!window.firebaseDB) return [];
+  try {
+    const snapshot = await window.firebaseDB.collection("ratings")
+      .orderBy("date", "desc")
+      .limit(10)
+      .get();
+    
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        name_ar: data.name,
+        name_en: data.name,
+        role_ar: "عميل",
+        role_en: "Client",
+        comment_ar: data.comment,
+        comment_en: data.comment,
+        stars: data.stars || 5,
+        avatar: data.name.charAt(0).toUpperCase()
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching ratings:", error);
+    return [];
+  }
+}
+
+async function renderTestimonials() {
   const track = document.getElementById('testimonialsTrack');
   const dotsContainer = document.getElementById('sliderDots');
-  if (!track || typeof TESTIMONIALS_DATA === 'undefined') return;
+  if (!track) return;
 
-  track.innerHTML = TESTIMONIALS_DATA.map(t => {
+  // Try to load from Firestore first
+  const firestoreRatings = await fetchFirestoreRatings();
+  const displayData = firestoreRatings.length > 0 ? firestoreRatings : (typeof TESTIMONIALS_DATA !== 'undefined' ? TESTIMONIALS_DATA : []);
+  
+  if (displayData.length === 0) return;
+
+  track.innerHTML = displayData.map(t => {
     const name = currentLang === 'ar' ? t.name_ar : t.name_en;
     const role = currentLang === 'ar' ? t.role_ar : t.role_en;
     const comment = currentLang === 'ar' ? t.comment_ar : t.comment_en;
@@ -391,7 +425,7 @@ function renderTestimonials() {
 
   // Dots
   if (dotsContainer) {
-    dotsContainer.innerHTML = TESTIMONIALS_DATA.map((_, i) =>
+    dotsContainer.innerHTML = displayData.map((_, i) =>
       `<div class="dot ${i === currentSlide ? 'active' : ''}" data-index="${i}"></div>`
     ).join('');
 
@@ -410,7 +444,11 @@ function goToSlide(index) {
   if (isAnimatingSlider) return;
   isAnimatingSlider = true;
 
-  currentSlide = Math.max(0, Math.min(index, TESTIMONIALS_DATA.length - 1));
+  const track = document.getElementById('testimonialsTrack');
+  const slideCount = track ? track.children.length : 0;
+  if (slideCount === 0) return;
+
+  currentSlide = Math.max(0, Math.min(index, slideCount - 1));
   updateSliderPosition();
 
   setTimeout(() => { isAnimatingSlider = false; }, 500);
@@ -435,7 +473,9 @@ function initSlider() {
 
   if (prevBtn) {
     prevBtn.addEventListener('click', () => {
-      const newIndex = currentSlide > 0 ? currentSlide - 1 : TESTIMONIALS_DATA.length - 1;
+      const track = document.getElementById('testimonialsTrack');
+      const slideCount = track ? track.children.length : 0;
+      const newIndex = currentSlide > 0 ? currentSlide - 1 : (slideCount > 0 ? slideCount - 1 : 0);
       goToSlide(newIndex);
       resetSliderInterval();
     });
@@ -443,7 +483,9 @@ function initSlider() {
 
   if (nextBtn) {
     nextBtn.addEventListener('click', () => {
-      const newIndex = currentSlide < TESTIMONIALS_DATA.length - 1 ? currentSlide + 1 : 0;
+      const track = document.getElementById('testimonialsTrack');
+      const slideCount = track ? track.children.length : 0;
+      const newIndex = currentSlide < slideCount - 1 ? currentSlide + 1 : 0;
       goToSlide(newIndex);
       resetSliderInterval();
     });
@@ -464,20 +506,24 @@ function initSlider() {
       if (!isDragging) return;
       const diff = startX - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 50) {
-        if (diff > 0) {
-          // Swipe left
-          const newIndex = currentLang === 'ar'
-            ? (currentSlide > 0 ? currentSlide - 1 : TESTIMONIALS_DATA.length - 1)
-            : (currentSlide < TESTIMONIALS_DATA.length - 1 ? currentSlide + 1 : 0);
-          goToSlide(newIndex);
-        } else {
-          // Swipe right
-          const newIndex = currentLang === 'ar'
-            ? (currentSlide < TESTIMONIALS_DATA.length - 1 ? currentSlide + 1 : 0)
-            : (currentSlide > 0 ? currentSlide - 1 : TESTIMONIALS_DATA.length - 1);
-          goToSlide(newIndex);
+        const track = document.getElementById('testimonialsTrack');
+        const slideCount = track ? track.children.length : 0;
+        if (slideCount > 0) {
+          if (diff > 0) {
+            // Swipe left
+            const newIndex = currentLang === 'ar'
+              ? (currentSlide > 0 ? currentSlide - 1 : slideCount - 1)
+              : (currentSlide < slideCount - 1 ? currentSlide + 1 : 0);
+            goToSlide(newIndex);
+          } else {
+            // Swipe right
+            const newIndex = currentLang === 'ar'
+              ? (currentSlide < slideCount - 1 ? currentSlide + 1 : 0)
+              : (currentSlide > 0 ? currentSlide - 1 : slideCount - 1);
+            goToSlide(newIndex);
+          }
+          resetSliderInterval();
         }
-        resetSliderInterval();
       }
       isDragging = false;
     }, { passive: true });
@@ -488,8 +534,12 @@ function initSlider() {
 
 function startSliderInterval() {
   sliderInterval = setInterval(() => {
-    const newIndex = currentSlide < TESTIMONIALS_DATA.length - 1 ? currentSlide + 1 : 0;
-    goToSlide(newIndex);
+    const track = document.getElementById('testimonialsTrack');
+    const slideCount = track ? track.children.length : 0;
+    if (slideCount > 1) {
+      const newIndex = currentSlide < slideCount - 1 ? currentSlide + 1 : 0;
+      goToSlide(newIndex);
+    }
   }, 5000);
 }
 
