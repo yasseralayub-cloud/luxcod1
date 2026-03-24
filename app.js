@@ -363,7 +363,7 @@ async function fetchFirestoreRatings() {
   if (!window.firebaseDB) return [];
   try {
     const snapshot = await window.firebaseDB.collection("ratings")
-      .orderBy("date", "desc")
+      .orderBy("date", "asc")
       .limit(50)
       .get();
     
@@ -451,6 +451,7 @@ async function renderTestimonials() {
     `;
     
     // ✅ أهم سطر: إضافة البطاقة إلى المسار باستخدام appendChild
+    // مع ترتيب تصاعدي، التقييمات تُضاف من الأقدم للأحدث
     track.appendChild(card);
   });
 
@@ -460,6 +461,7 @@ async function renderTestimonials() {
     displayData.forEach((_, i) => {
       const dot = document.createElement('div');
       dot.classList.add('dot');
+      // تحديث النقطة النشطة بناءً على موقع السلايدر الجديد
       if (i === currentSlide) dot.classList.add('active');
       dot.setAttribute('data-index', i);
       dotsContainer.appendChild(dot);
@@ -475,11 +477,12 @@ async function renderTestimonials() {
     });
   }
 
-  // إعادة تعيين السلايد إلى البداية عند التحديث
-  currentSlide = 0;
+  // 🎯 الحل المثالي: ابدأ من آخر عنصر (أحدث تقييم)
+  // مع ترتيب تصاعدي (asc)، آخر عنصر = أحدث تقييم
+  currentSlide = displayData.length - 1;
   updateSliderPosition();
   
-  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح`);
+  console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح | السلايدر يبدأ من: ${currentSlide}`);
 }
 function goToSlide(index) {
   if (isAnimatingSlider) return;
