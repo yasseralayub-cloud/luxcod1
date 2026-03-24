@@ -1049,9 +1049,14 @@ body.lang-en .check-item:hover { transform: translateX(4px); }
 .testimonials-track {
   display: flex;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  /* ✅ ضمان تدفق العناصر بشكل أفقي بدون التفاف */
+  flex-wrap: nowrap;
+  gap: 16px;
 }
 
 .testimonial-card {
+  /* ✅ كل بطاقة تأخذ عرض كامل الحاوية */
+  flex: 0 0 100%;
   min-width: 100%;
   padding: 0 8px;
 }

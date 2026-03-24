@@ -500,10 +500,14 @@ function goToSlide(index) {
 
 function updateSliderPosition() {
   const track = document.getElementById('testimonialsTrack');
-  if (!track) return;
+  if (!track || track.children.length === 0) return;
 
+  // استخدام حساب بسيط يعتمد على عرض الحاوية لضمان عمل السلايدر في كل الظروف
   const dir = currentLang === 'en' ? 1 : -1;
-  track.style.transform = `translateX(${dir * currentSlide * 100}%)`;
+  const moveAmount = currentSlide * 100;
+  
+  // إذا كان هناك Gap في CSS، نستخدم calc لتعويضه
+  track.style.transform = `translateX(calc(${dir * moveAmount}% ${dir === 1 ? '-' : '+'} ${currentSlide * 16}px))`;
 
   // Update dots
   document.querySelectorAll('.dot').forEach((dot, i) => {
