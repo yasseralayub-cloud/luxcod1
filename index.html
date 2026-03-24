@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- EmailJS Library -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3.11.0/dist/index.min.js"></script>
   <meta name="description" content="LuxCod - وكالة رقمية متخصصة في تصميم المواقع وصفحات الهبوط وتحسين تجربة المستخدم" />
   <meta name="keywords" content="تصميم مواقع, صفحات هبوط, UI/UX, وكالة رقمية, LuxCod" />
   <title>LuxCod | نبني تجارب رقمية تنمو بها أعمالك</title>
@@ -536,8 +536,12 @@
   <!-- EmailJS Initialization -->
   <script>
     (function(){
-      emailjs.init("njvn9St5gAnWLOI61");
-      console.log('✅ EmailJS initialized successfully');
+      if (typeof emailjs !== 'undefined') {
+        emailjs.init("njvn9St5gAnWLOI61");
+        console.log('✅ EmailJS initialized successfully');
+      } else {
+        console.error('❌ EmailJS library not loaded');
+      }
     })();
   </script>
 </body>
