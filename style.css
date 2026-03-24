@@ -1047,18 +1047,31 @@ body.lang-en .check-item:hover { transform: translateX(4px); }
 }
 
 .testimonials-track {
-  display: flex;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  /* ✅ ضمان تدفق العناصر بشكل أفقي بدون التفاف */
-  flex-wrap: nowrap;
-  gap: 16px;
+  /* ✅ الحل الجذري: تحويل السلايدر إلى نظام شبكة Grid احترافي */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  transform: none !important;
+  padding: 10px 0;
 }
 
 .testimonial-card {
-  /* ✅ كل بطاقة تأخذ عرض كامل الحاوية */
-  flex: 0 0 100%;
-  min-width: 100%;
-  padding: 0 8px;
+  /* ✅ كل بطاقة تأخذ عرضها الطبيعي في الشبكة */
+  min-width: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.testimonials-wrapper {
+  /* ✅ السماح بظهور كل المحتوى */
+  overflow: visible;
+  border-radius: 0;
+  margin-bottom: 40px;
+}
+
+/* إخفاء أزرار التحكم في السلايدر القديم */
+.slider-controls {
+  display: none !important;
 }
 
 .testimonial-inner {

@@ -485,34 +485,13 @@ async function renderTestimonials() {
   console.log(`✅ تم عرض ${displayData.length} تقييم بنجاح | السلايدر يبدأ من: ${currentSlide}`);
 }
 function goToSlide(index) {
-  if (isAnimatingSlider) return;
-  isAnimatingSlider = true;
-
-  const track = document.getElementById('testimonialsTrack');
-  const slideCount = track ? track.children.length : 0;
-  if (slideCount === 0) return;
-
-  currentSlide = Math.max(0, Math.min(index, slideCount - 1));
-  updateSliderPosition();
-
-  setTimeout(() => { isAnimatingSlider = false; }, 500);
+  // ✅ تعطيل منطق التنقل بين الشرائح - لا يوجد سلايدر بعد الآن
+  return;
 }
 
 function updateSliderPosition() {
-  const track = document.getElementById('testimonialsTrack');
-  if (!track || track.children.length === 0) return;
-
-  // استخدام حساب بسيط يعتمد على عرض الحاوية لضمان عمل السلايدر في كل الظروف
-  const dir = currentLang === 'en' ? 1 : -1;
-  const moveAmount = currentSlide * 100;
-  
-  // إذا كان هناك Gap في CSS، نستخدم calc لتعويضه
-  track.style.transform = `translateX(calc(${dir * moveAmount}% ${dir === 1 ? '-' : '+'} ${currentSlide * 16}px))`;
-
-  // Update dots
-  document.querySelectorAll('.dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === currentSlide);
-  });
+  // ✅ تعطيل منطق السلايدر القديم - النظام الجديد يستخدم Grid
+  return;
 }
 
 function initSlider() {
