@@ -1046,27 +1046,101 @@ body.lang-en .check-item:hover { transform: translateX(4px); }
   margin-bottom: 40px;
 }
 
-.testimonials-track {
-  /* ✅ الحل الجذري: تحويل السلايدر إلى نظام شبكة Grid احترافي */
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  transform: none !important;
-  padding: 10px 0;
+.testimonials-wrapper {
+  overflow: hidden;
+  margin-bottom: 40px;
+  position: relative;
+  padding: 40px 0;
 }
 
-.testimonial-card {
-  /* ✅ كل بطاقة تأخذ عرضها الطبيعي في الشبكة */
-  min-width: 0;
-  padding: 0;
+/* المسارات الثلاثة */
+.marquee-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   width: 100%;
 }
 
-.testimonials-wrapper {
-  /* ✅ السماح بظهور كل المحتوى */
-  overflow: visible;
-  border-radius: 0;
-  margin-bottom: 40px;
+.marquee-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  padding: 10px 0;
+}
+
+/* الخط الأول والثالث: من اليمين لليسار */
+.marquee-rtl {
+  animation: marquee-rtl 40s linear infinite;
+}
+
+/* الخط الثاني: من اليسار لليمين */
+.marquee-ltr {
+  animation: marquee-ltr 40s linear infinite;
+}
+
+/* توقف الحركة عند مرور الفأرة */
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-rtl {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-ltr {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.testimonial-card {
+  /* ✅ حجم أصغر للبطاقات لتناسب الشريط */
+  flex: 0 0 300px;
+  width: 300px;
+  min-width: 300px;
+}
+
+.testimonial-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px; /* تقليل البادينج */
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.testimonial-inner:hover {
+  border-color: var(--gold);
+  transform: translateY(-5px);
+}
+
+.testimonial-comment {
+  font-size: 0.9rem; /* تصغير الخط */
+  color: var(--text);
+  line-height: 1.5;
+  text-align: right;
+  margin-bottom: 15px;
+  font-style: normal;
+}
+
+.testimonial-author {
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.author-avatar {
+  width: 35px;
+  height: 35px;
+  font-size: 0.7rem;
+}
+
+.author-info h4 {
+  font-size: 0.85rem;
+}
+
+.author-info span {
+  font-size: 0.75rem;
 }
 
 /* إخفاء أزرار التحكم في السلايدر القديم */
