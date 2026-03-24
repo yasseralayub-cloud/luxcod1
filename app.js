@@ -364,7 +364,7 @@ async function fetchFirestoreRatings() {
   try {
     const snapshot = await window.firebaseDB.collection("ratings")
       .orderBy("date", "desc")
-      .limit(10)
+      .limit(50)
       .get();
     
     return snapshot.docs.map(doc => {
@@ -392,14 +392,31 @@ async function renderTestimonials() {
   const dotsContainer = document.getElementById('sliderDots');
   if (!track) return;
 
-  // Try to load from Firestore first
+  // جلب التقييمات من Firestore
   const firestoreRatings = await fetchFirestoreRatings();
-  const displayData = firestoreRatings.length > 0 ? firestoreRatings : (typeof TESTIMONIALS_DATA !== 'undefined' ? TESTIMONIALS_DATA : []);
+  
+  // دمج تقييمات Firestore مع البيانات الثابتة (لا نستبدلها)
+  let displayData = [];
+  
+  if (firestoreRatings.length > 0) {
+    // إضافة تقييمات Firestore أولاً
+    displayData = [...firestoreRatings];
+    
+    // إضافة البيانات الثابتة إذا كانت موجودة
+    if (typeof TESTIMONIALS_DATA !== 'undefined' && TESTIMONIALS_DATA.length > 0) {
+      displayData = [...displayData, ...TESTIMONIALS_DATA];
+    }
+  } else {
+    // إذا لم توجد تقييمات في Firestore، استخدم البيانات الثابتة فقط
+    displayData = typeof TESTIMONIALS_DATA !== 'undefined' ? TESTIMONIALS_DATA : [];
+  }
   
   if (displayData.length === 0) return;
 
-  // مسح القديم فقط قبل إعادة التحميل
-  track.innerHTML = "";
+  // مسح المحتوى القديم قبل إعادة التحميل
+  while (track.firstChild) {
+    track.removeChild(track.firstChild);
+  }
   
   // استخدام appendChild لإضافة العناصر بدلاً من innerHTML
   displayData.forEach(t => {
@@ -461,6 +478,8 @@ async function renderTestimonials() {
   // إعادة تعيين السلايد إلى البداية عند التحديث
   currentSlide = 0;
   updateSliderPosition();
+  
+  console.log(`✅ Rendered ${displayData.length} testimonials successfully`);
 }
 function goToSlide(index) {
   if (isAnimatingSlider) return;

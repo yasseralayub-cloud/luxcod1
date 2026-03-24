@@ -188,7 +188,7 @@ async function loadAndRenderRatings() {
 
         const snapshot = await window.firebaseDB.collection("ratings")
             .orderBy("date", "desc")
-            .limit(10)
+            .limit(50)
             .get();
         
         const ratings = [];
