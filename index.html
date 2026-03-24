@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <meta name="description" content="LuxCod - وكالة رقمية متخصصة في تصميم المواقع وصفحات الهبوط وتحسين تجربة المستخدم" />
   <meta name="keywords" content="تصميم مواقع, صفحات هبوط, UI/UX, وكالة رقمية, LuxCod" />
   <title>LuxCod | نبني تجارب رقمية تنمو بها أعمالك</title>
@@ -195,7 +194,7 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="متوافق مع جميع الأجهزة" data-en="All Devices Compatible">متوافق مع جميع الأجهزة</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="سرعة تحميل فائقة" data-en="Lightning Fast Loading">سرعة تحميل فائقة</span></li>
           </ul>
-          <button class="btn btn-primary btn-full" onclick="openWhatsAppChat('website-design')" style="margin-top: 20px;">
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('website-design')" style="margin-top: 20px;">
             <i class="fa-solid fa-shopping-cart"></i>
             <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
           </button>
@@ -213,7 +212,7 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="نصوص مقنعة وجذابة" data-en="Persuasive Copywriting">نصوص مقنعة وجذابة</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="اختبار A/B" data-en="A/B Testing">اختبار A/B</span></li>
           </ul>
-          <button class="btn btn-primary btn-full" onclick="openWhatsAppChat('landing-page')" style="margin-top: 20px;">
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('landing-page')" style="margin-top: 20px;">
             <i class="fa-solid fa-shopping-cart"></i>
             <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
           </button>
@@ -230,7 +229,7 @@
             <li><i class="fa-solid fa-check"></i><span data-ar="تحسين رحلة العميل" data-en="Customer Journey Optimization">تحسين رحلة العميل</span></li>
             <li><i class="fa-solid fa-check"></i><span data-ar="تصميم واجهات بديهية" data-en="Intuitive Interface Design">تصميم واجهات بديهية</span></li>
           </ul>
-          <button class="btn btn-primary btn-full" onclick="openWhatsAppChat('ui-ux-optimization')" style="margin-top: 20px;">
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('ui-ux-optimization')" style="margin-top: 20px;">
             <i class="fa-solid fa-shopping-cart"></i>
             <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
           </button>
@@ -247,7 +246,7 @@
             <li><i class="fa-brands fa-google"></i><span data-ar="خرائط جوجل" data-en="Google Maps">خرائط جوجل</span></li>
             <li><i class="fa-solid fa-share-nodes"></i><span data-ar="ربط وسائل التواصل" data-en="Social Media Links">ربط وسائل التواصل</span></li>
           </ul>
-          <button class="btn btn-primary btn-full" onclick="openWhatsAppChat('integrations')" style="margin-top: 20px;">
+          <button class="btn btn-primary btn-full" onclick="openServiceOrderModal('integrations')" style="margin-top: 20px;">
             <i class="fa-solid fa-shopping-cart"></i>
             <span data-ar="اطلب الآن" data-en="Order Now">اطلب الآن</span>
           </button>
@@ -516,6 +515,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-functions.js"></script>
 
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/index.min.js"></script>
+
   <!-- Data & Config -->
   <script src="data.js"></script>
   <script src="firebase-config.js"></script>
@@ -523,7 +525,7 @@
   <!-- Features -->
   <script src="auth.js"></script>
   <script src="ratings.js"></script>
-  <script src="contact-form-handler.js"></script>
+  <script src="contact-email.js"></script>
   <script src="payments.js"></script>
   <script src="services-ordering.js"></script>
   <script src="whatsapp-integration.js"></script>
@@ -531,7 +533,5 @@
   
   <!-- Main App -->
   <script src="app.js"></script>
-
-
 </body>
 </html>
